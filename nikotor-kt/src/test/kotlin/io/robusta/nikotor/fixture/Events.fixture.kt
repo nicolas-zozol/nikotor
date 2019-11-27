@@ -10,7 +10,7 @@ class PotAuFeu(val ingredients: String, val time: Long) {
 val potAuFeu = PotAuFeu("Tomato, Beef, Lemon", 1500);
 
 class PotAuFeuEventStarted (override val payload:PotAuFeu):NikotorEvent<PotAuFeu>{
-    override val type = "POT_AU_FEU_EVENT";
+    override val type = "POT_AU_FEU_STARTED";
     override val technicalDate = Date().time;
 }
 

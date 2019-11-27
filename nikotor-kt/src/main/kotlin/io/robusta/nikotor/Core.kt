@@ -1,5 +1,6 @@
 package io.robusta.nikotor
 
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 interface Command<out Payload> {
@@ -32,9 +33,8 @@ interface NikotorEvent<out EventPayload> {
     val payload: EventPayload; // the business information related to the event
 }
 
-data class NikEvent<out P>(override val type: String, override val technicalDate: Long, override val payload: P) :
-    NikotorEvent<P> {
-
+data class NikEvent<out P>(override val type: String, override val payload: P) :NikotorEvent<P>{
+    override val technicalDate = Date().time;
 }
 
 data class PersistedNikEvent<P>(

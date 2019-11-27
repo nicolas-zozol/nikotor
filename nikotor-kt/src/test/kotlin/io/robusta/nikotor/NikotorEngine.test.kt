@@ -7,12 +7,12 @@ import org.junit.jupiter.api.TestInstance
 class NikotorEngineTest {
 
 
-    val store:EventStore;
-    val engine : NikotorEngine;
+   // val store:EventStore;
+    //val engine : NikotorEngine;
 
     init {
-        store = EventStore()
-        engine = NikotorEngine()
+        //store = EventStore()
+        //engine = NikotorEngine()
     }
 
 

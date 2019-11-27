@@ -25,29 +25,19 @@ class InMemoryEventStore : EventStore {
 
 
 
-    fun getAllEventsStartingFromIndex(originIndex = 0): Promise<SamEvent[]>
+    fun getAllEventsStartingFromIndex(originIndex: Int = 0): CompletableFuture<PersistedEvents>
     {
-        return new Promise (resolve => {
-        resolve(this.events);
-    });
+        return CompletableFuture.completedFuture(this.events);
     }
 
-    fun loadInitialEvents(): Promise<PersistedSamEvent[]>
+    override fun loadInitialEvents(): CompletableFuture<PersistedEvents>
     {
-        const startsEvents =[
-        ];
-        const promises : Array < Promise < PersistedSamEvent > > =[];
-
-        for (const event of startsEvents) {
-        promises.push(this.add(event));
-    }
-        console.log("Loaded in memory all saved events : " + startsEvents.length);
-        return Promise.all(promises);
+        return this.getAllEventsStartingFromIndex(0);
     }
 
-    fun resetWith(events: SamEvent[]): Promise<PersistedSamEvent[]>
+    override fun resetWith(events: Events): CompletableFuture<PersistedEvents>
     {
-        this.events = [];
+        this.events.clear();
         return this.addAll(events);
     }
 }

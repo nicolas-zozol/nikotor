@@ -1,4 +1,4 @@
-package io.robusta.nikotor.springdemo.rest;
+package main.kotlin.nikotor.springdemo.rest;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

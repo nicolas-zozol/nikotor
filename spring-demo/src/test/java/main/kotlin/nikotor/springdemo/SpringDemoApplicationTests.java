@@ -1,4 +1,4 @@
-package io.robusta.nikotor.springdemo;
+package main.kotlin.nikotor.springdemo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -3,19 +3,30 @@ package io.robusta.nikotor
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-interface Command<out Payload> {
-    val type: String;
-    val payload: Payload;
-    fun validate(): CompletableFuture<Boolean>;
-    fun <EventPayload> generateEvent(): NikotorEvent<EventPayload>;
+/**
+ * @result: true if validation succeed
+ * @reasons: Map of key / errors on the key
+ */
+class ValidationResult(val result:Boolean, val reasons:Map<String, String>){
+
 }
 
-interface RunnableCommand<Payload, CommandResult> : Command<Payload> {
+interface Command<out Payload, CommandResult> {
+    val type: String;
+    val payload: Payload;
+    /**
+     * Used for surface validation, mostly checking the values of the command Payload.
+     * Use the `run()` function to ensure the state of application is compatible with
+     * your command
+     */
+    fun validate(): ValidationResult;
+    fun <EventPayload> generateEvent(result:CommandResult): NikotorEvent<EventPayload>;
     /**
      * Warning: should not modify the projections !
      * Side effects are http request to external system, write in files....
      * It can also decide if projection state is suitable for executing command in nominal case.
-     * For exemple the result of `run()` can be `true` or `InsufficiantStock`
+     * For example the result of `run()` can be `true` or false, or throw a
+     * `InsufficientStockException` that will be catch by the engine.
      */
     fun run(): CompletableFuture<CommandResult>
 
@@ -24,7 +35,6 @@ interface RunnableCommand<Payload, CommandResult> : Command<Payload> {
      * will be generated.
      */
     fun getCommandResult(): CommandResult;
-
 }
 
 interface NikotorEvent<out EventPayload> {
@@ -57,9 +67,9 @@ typealias Events = List<NikotorEvent<*>>
 typealias PersistedEvents = List<PersistedEvent<*>>
 
 interface EventStore {
-    fun <EventPayload> add(event: NikotorEvent<EventPayload>): CompletableFuture<PersistedEvent<EventPayload>>;
+    fun <EventPayload> persist(event: NikotorEvent<EventPayload>): CompletableFuture<PersistedEvent<EventPayload>>;
 
-    fun addAll(events: Events): CompletableFuture<PersistedEvents>;
+    fun persistAll(events: Events): CompletableFuture<PersistedEvents>;
 
     fun loadInitialEvents(): CompletableFuture<PersistedEvents>;
 
@@ -77,7 +87,7 @@ interface NikotorSubscriber {
 
 interface NikotorEngine {
 
-    fun <Payload, EventPayload> process(command: Command<Payload>): CompletableFuture<NikotorEvent<EventPayload>>;
+    fun <Payload, EventPayload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<EventPayload>>;
     fun subscribe(newSubscriber: NikotorSubscriber): Void;
     fun unsubscribe(oldSubscriber: NikotorSubscriber): Void;
 

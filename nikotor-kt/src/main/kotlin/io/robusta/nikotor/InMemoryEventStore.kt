@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture
 class InMemoryEventStore : EventStore {
     val events: MutableList<PersistedNikEvent<*>> = ArrayList()
 
-    override fun <P> add(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<P>> {
+    override fun <P> persist(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<P>> {
 
         val persistedEvent =
             PersistedNikEvent((events.size + 1).toLong(), event.type, event.technicalDate, event.payload)
@@ -14,8 +14,8 @@ class InMemoryEventStore : EventStore {
 
     }
 
-    override fun addAll(events: Events): CompletableFuture<PersistedEvents> {
-        val list = events.map { e -> add(e) }
+    override fun persistAll(events: Events): CompletableFuture<PersistedEvents> {
+        val list = events.map { e -> persist(e) }
         return CompletableFuture
             .allOf(*list.toTypedArray())
             .thenApply { list.map { future -> future.get() } }
@@ -32,6 +32,6 @@ class InMemoryEventStore : EventStore {
 
     override fun resetWith(events: Events): CompletableFuture<PersistedEvents> {
         this.events.clear()
-        return this.addAll(events)
+        return this.persistAll(events)
     }
 }

@@ -35,27 +35,51 @@ interface Command<out Payload, CommandResult>{
     fun validate(): ValidationResult
 
     // TODO: Not happy at all with this * invariance
-    fun  generateEvent(result:CommandResult?): NikotorEvent<*>
+    fun  generateEvent(result:CommandResult): NikotorEvent<*>
+
     /**
      * Warning: should not modify the projections !
      * Side effects are http request to external system, write in files....
      * It can also decide if projection state is suitable for executing command in nominal case.
      * For example the result of `run()` can be `true` or false, or throw a
      * `InsufficientStockException` that will be catch by the engine.
+     *
+     * If `run()` does nothing, you probably want a #SimpleCommand
+     * If `run()` throws exception without returning a result, you probably want a #ThrowableCommand
+     *
      */
-    fun run(): CompletableFuture<CommandResult?>
+    fun run(): CompletableFuture<CommandResult>
 
 
 }
 
-abstract class SimpleCommand<out Payload>(override val type: String, override val payload: Payload) :Command<Payload, Void> {
-    override fun generateEvent(result: Void?): NikotorEvent<*> {
+abstract class ThrowableCommand<out Payload>(override val type: String, override val payload: Payload) :Command<Payload, Unit> {
+
+    override fun generateEvent(result: Unit): NikotorEvent<*> {
         return this.generateEvent()
     }
 
     abstract fun generateEvent(): NikotorEvent<*>
 
-    override fun run(): CompletableFuture<Void?> = CompletableFuture.runAsync{}
+    override fun run():CompletableFuture<Unit>{
+        runUnit()
+        return futureUnit
+    }
+
+    abstract fun runUnit()
+}
+
+/**
+ * Command that does not run anything. Therefore the generated event is predictive if validation is
+ */
+abstract class SimpleCommand<out Payload>(override val type: String, override val payload: Payload) :Command<Payload, Unit> {
+    override fun generateEvent(result: Unit): NikotorEvent<*> {
+        return this.generateEvent()
+    }
+
+    abstract fun generateEvent(): NikotorEvent<*>
+
+    override fun run(): CompletableFuture<Unit> = futureUnit
 }
 
 

@@ -22,10 +22,20 @@ class ValidationResult(var result:Boolean=true){
 }
 
 
-
+/**
+ * Commands are NOT responsible for authorization of its execution. Processing a
+ * command comes afterward.
+ *
+ * A Command has a surface validation (payload empty, negative, not valid email...)
+ * then is run(), which can do :
+ *      - deeper validation against application state and maybe throw a IllegalStateException
+ *      - side effect (write in a file, make a http query to Stripe...)
+ *      - return a value of type CommandResult
+ *
+ * Some Command (#SimpleCommand, #ThrowableCommand) return a kotlin Unit result
+ */
 interface Command<out Payload, CommandResult>{
 
-    val type: String
     val payload: Payload
     /**
      * Used for surface validation, mostly checking the values of the command Payload.
@@ -53,13 +63,7 @@ interface Command<out Payload, CommandResult>{
 
 }
 
-abstract class ThrowableCommand<out Payload>(override val type: String, override val payload: Payload) :Command<Payload, Unit> {
-
-    override fun generateEvent(result: Unit): NikotorEvent<*> {
-        return this.generateEvent()
-    }
-
-    abstract fun generateEvent(): NikotorEvent<*>
+abstract class ThrowableCommand<out Payload>(override val payload: Payload) :Command<Payload, Unit> {
 
     override fun run():CompletableFuture<Unit>{
         runUnit()
@@ -67,12 +71,20 @@ abstract class ThrowableCommand<out Payload>(override val type: String, override
     }
 
     abstract fun runUnit()
+
+    override fun generateEvent(result: Unit): NikotorEvent<*> {
+        return this.generateEvent()
+    }
+
+    abstract fun generateEvent(): NikotorEvent<*>
+
+
 }
 
 /**
  * Command that does not run anything. Therefore the generated event is predictive if validation is
  */
-abstract class SimpleCommand<out Payload>(override val type: String, override val payload: Payload) :Command<Payload, Unit> {
+abstract class SimpleCommand<out Payload>(override val payload: Payload) :Command<Payload, Unit> {
     override fun generateEvent(result: Unit): NikotorEvent<*> {
         return this.generateEvent()
     }

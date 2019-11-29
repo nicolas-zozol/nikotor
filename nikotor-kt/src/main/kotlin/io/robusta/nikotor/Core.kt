@@ -39,8 +39,11 @@ interface Command<out Payload, CommandResult>{
     val payload: Payload
     /**
      * Used for surface validation, mostly checking the values of the command Payload.
+     *
      * Use the `run()` function to ensure the state of application is compatible with
      * your command
+     *
+     * Use `return ValidationResult()` to return a always true validation
      */
     fun validate(): ValidationResult
 

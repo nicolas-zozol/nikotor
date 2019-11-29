@@ -7,28 +7,26 @@ import java.util.concurrent.CompletableFuture
  * Very simple engine with InMemoryEventStore and no subscription
  */
 class SimpleNikotorEngine(
-
-    projectionsUpdaters: List<ProjectionUpdater> = emptyList()
+        override val eventStore: EventStore = InMemoryEventStore(),
+        val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
-    private val eventStore = InMemoryEventStore();
 
-    override fun <Payload, EventPayload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<EventPayload>> {
+    override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>> {
 
-        val validation = command.validate();
+        val validation = command.validate()
         if (!validation.result) {
-            throw NikotorException(validation.reasons.toString(), 400, ErrorTypes.VALIDATION_ERROR, validation.reasons);
+            throw NikotorException(validation.reasons.toString(), 400, ErrorTypes.VALIDATION_ERROR, validation.reasons)
         }
-        val result: CommandResult;
+        val result: CommandResult?
         try {
-            result = command.run().get();
-            val event = command.generateEvent<EventPayload>(result);
-            val persistedEvent = eventStore.persist(event);
-            return persistedEvent;
+            result = command.run().get()
+            val event = command.generateEvent(result)
+            return eventStore.persist(event)
         } catch (nikException: NikotorException) {
             // detected error, just rethrow
-            throw nikException;
+            throw nikException
         } catch (e: Exception) {
-            throw NikotorException(e.message.orEmpty(), 500, ErrorTypes.COMMAND_ERROR, e.message.orEmpty());
+            throw NikotorException(e.message.orEmpty(), 500, ErrorTypes.COMMAND_ERROR, e.message.orEmpty())
         }
     }
 

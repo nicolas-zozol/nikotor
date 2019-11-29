@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture
 class InMemoryEventStore : EventStore {
     val events: MutableList<PersistedNikEvent<*>> = ArrayList()
 
-    override fun <P> persist(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<P>> {
+    override fun <P> persist(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<*>> {
 
         val persistedEvent =
             PersistedNikEvent((events.size + 1).toLong(), event.type, event.technicalDate, event.payload)

@@ -1,25 +1,35 @@
 package main.kotlin.nikotor.io.robusta.nikotor.fixture
 
-import io.robusta.nikotor.Command
+import io.robusta.nikotor.SimpleCommand
 import io.robusta.nikotor.NikotorEvent
+import io.robusta.nikotor.ValidationResult
+import io.robusta.nikotor.fixture.PotAuFeuEventStarted
+import io.robusta.nikotor.fixture.potAuFeuStarted
 import java.util.concurrent.CompletableFuture
 
-class StartCommand(override val payload: PotAuFeu) : Command<PotAuFeu, Void>{
-    override val type = "START_COMMAND";
-    override fun validate(): Boolean {
-        return payload.ingredients.isNotEmpty();
+class StartCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>("START_COMMAND",payload){
+    override fun generateEvent(): NikotorEvent<PotAuFeu> {
+        return potAuFeuStarted
     }
 
-    override fun <EventPayload> generateEvent(result: Void): NikotorEvent<EventPayload> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    override fun run(): CompletableFuture<Void> {
-        return CompletableFuture.runAsync{};
-    }
+    override fun validate(): ValidationResult {
 
-    override fun getCommandResult(): Void {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return ValidationResult()
+                .check("ingredients", payload.ingredients.isNotEmpty(), "Ingredients should not be empty")
     }
-
 }
+
+class EndCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>("END_COMMAND",payload){
+    override fun generateEvent(): NikotorEvent<PotAuFeu> {
+        return potAuFeuStarted
+    }
+
+
+    override fun validate(): ValidationResult {
+        return ValidationResult()
+    }
+}
+
+val startCommand = StartCommand(potAuFeu)
+val endCommand = EndCommand(potAuFeu)

@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture
  */
 class SimpleNikotorEngine(
         override val eventStore: EventStore = InMemoryEventStore(),
-        val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
+        private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
     override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>> {
@@ -21,13 +21,19 @@ class SimpleNikotorEngine(
         try {
             result = command.run().get()
             val event = command.generateEvent(result)
-            return eventStore.persist(event)
+            val future = eventStore.persist(event)
+            future.thenAccept { update(it) }
+            return future
         } catch (nikException: NikotorException) {
             // detected error, just rethrow
             throw nikException
         } catch (e: Exception) {
             throw NikotorException(e.message.orEmpty(), 500, ErrorTypes.COMMAND_ERROR, e.message.orEmpty())
         }
+    }
+
+    private fun update(persistedEvent: PersistedEvent<*>){
+        projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent) }
     }
 
 

@@ -1,8 +1,8 @@
 package main.kotlin.nikotor.io.robusta.nikotor
 
 import io.robusta.nikotor.InMemoryEventStore
-import io.robusta.nikotor.fixture.potAuFeuEnded
-import io.robusta.nikotor.fixture.potAuFeuStarted
+import io.robusta.nikotor.fixture.potaufeu.potAuFeuEnded
+import io.robusta.nikotor.fixture.potaufeu.potAuFeuStarted
 
 import org.junit.Before
 import org.junit.Test

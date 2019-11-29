@@ -1,9 +1,7 @@
 package io.robusta.nikotor
 
 
-import main.kotlin.nikotor.io.robusta.nikotor.fixture.StartCommand
-import main.kotlin.nikotor.io.robusta.nikotor.fixture.badPotAuFeu
-import main.kotlin.nikotor.io.robusta.nikotor.fixture.startCommand
+import io.robusta.nikotor.fixture.potaufeu.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
@@ -14,27 +12,32 @@ class NikotorEngineTest {
 
     lateinit var store: InMemoryEventStore
     lateinit var engine: NikotorEngine
+    private val updater = potAuFeuProjectionUpdater
 
     @Before
     fun init() {
         store = InMemoryEventStore()
-        engine = SimpleNikotorEngine(store)
+        engine = SimpleNikotorEngine(store, listOf(updater))
+        potAuFeuDatabase.clear()
     }
 
 
     @Test
     fun processSuccess() {
+        assert(potAuFeuDatabase.isEmpty())
         val event = engine.process(startCommand).get()
         assert(store.events.size == 1)
         assert(event.sequenceId == 1L)
+        assert(potAuFeuDatabase.size == 1)
 
     }
 
 
     @Test
     fun processFailValidation() {
+        assert(potAuFeuDatabase.isEmpty())
         assertThrows<NikotorValidationException> { engine.process(StartCommand(badPotAuFeu)) }
-
+        assert(potAuFeuDatabase.isEmpty())
     }
 
 

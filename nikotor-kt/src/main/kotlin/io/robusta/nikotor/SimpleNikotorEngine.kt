@@ -15,7 +15,7 @@ class SimpleNikotorEngine(
 
         val validation = command.validate()
         if (!validation.result) {
-            throw NikotorException(validation.reasons.toString(), 400, ErrorTypes.VALIDATION_ERROR, validation.reasons)
+            throw NikotorValidationException(validation.reasons.toString(), validation.reasons)
         }
         val result: CommandResult?
         try {

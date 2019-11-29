@@ -17,8 +17,12 @@ object ErrorTypes {
     val SERVER_ERROR = "SERVER_ERROR"
 }
 
-class NikotorException(message: String, status: Int, type: String,  value: Any = Unit) : RuntimeException(message) {
+open class NikotorException(message: String, status: Int, type: String,  value: Any = Unit) : RuntimeException(message) {
     val reason = NikotorReason(message, status, type, value)
+}
+
+class NikotorValidationException(message: String, value: Any = Unit) : NikotorException(message, 400, ErrorTypes.VALIDATION_ERROR, value) {
+
 }
 
 

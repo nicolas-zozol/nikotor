@@ -22,7 +22,8 @@ open class NikotorException(message: String, status: Int, type: String,  value: 
 }
 
 class NikotorValidationException(message: String, value: Any = Unit) : NikotorException(message, 400, ErrorTypes.VALIDATION_ERROR, value) {
-
 }
 
+class NotFoundException(message: String, value: Any = Unit) : NikotorException(message, 404, ErrorTypes.SERVER_ERROR, value) {
+}
 

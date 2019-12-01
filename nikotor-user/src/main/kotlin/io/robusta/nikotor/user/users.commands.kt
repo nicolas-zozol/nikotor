@@ -105,6 +105,30 @@ class AskPasswordResetCommand(override val payload: EmailPayload): Command<Email
 
 }
 
+data class UserPayload(val user:User){}
+class UpdateUserCommand(override val payload: UserPayload):Command<UserPayload,UserPayload>{
+    override fun run():Await<UserPayload> {
+        val email = payload.user.email
+        val originalUser = queryUserByEmail(email).get() ?:throw NotFoundException("User $email not found")
+        // setting password into the DTO that will be the EventPayload
+        payload.user.password=originalUser.password
+        return awaitNow(payload)
+
+    }
+
+    override fun validate(): ValidationResult {
+        // There should not be the password in it !
+        return ValidationResult()
+            .check( payload.user.email.isNotEmpty(), "Email is empty")
+            .check( payload.user.password?.isEmpty() ?: true, "Password should be empty")
+    }
+
+    override fun generateEvent(result: UserPayload): NikotorEvent<*> {
+        check(!result.user.password.isNullOrEmpty())
+        return SimpleEvent(UserEvents.USER_UPDATED, result)
+    }
+
+}
 
 
 

@@ -1,6 +1,6 @@
 package io.robusta.nikotor.fixture.potaufeu
 
-import io.robusta.nikotor.NikEvent
+import io.robusta.nikotor.SimpleEvent
 import io.robusta.nikotor.NikotorEvent
 import java.util.*
 
@@ -20,7 +20,7 @@ class PotAuFeuEventStarted (override val payload: PotAuFeu):NikotorEvent<PotAuFe
 val potAuFeuStarted = PotAuFeuEventStarted(PotAuFeu("Tomato, Beef, Lemon", 1500))
 
 // Looks much more simple ...
-val potAuFeuEnded = NikEvent(PotAuFeuEvents.POT_AU_FEU_ENDED, potAuFeu)
+val potAuFeuEnded = SimpleEvent(PotAuFeuEvents.POT_AU_FEU_ENDED, potAuFeu)
 
 
 

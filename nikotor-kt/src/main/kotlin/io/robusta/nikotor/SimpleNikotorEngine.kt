@@ -13,10 +13,8 @@ class SimpleNikotorEngine(
 
     override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>> {
 
-        val validation = command.validate()
-        if (!validation.result) {
-            throw NikotorValidationException(validation.reasons.toString(), validation.reasons)
-        }
+        command.validate().throwIfInvalid()
+
         val result: CommandResult?
         try {
             result = command.run().get()

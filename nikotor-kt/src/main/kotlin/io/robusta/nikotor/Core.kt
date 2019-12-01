@@ -9,17 +9,22 @@ import java.util.concurrent.CompletableFuture
  */
 class ValidationResult(var result:Boolean=true){
 
-    val reasons = mutableMapOf<String,String>()
-    fun check(key:String, condition:Boolean, reason:String): ValidationResult{
+    private val reasons = mutableListOf<String>()
+    fun check(condition:Boolean, reason:String): ValidationResult{
         if (!condition){
             result= false
-            reasons[key] = reason
+            reasons+= reason
         }
         return this
     }
 
-
+    fun throwIfInvalid(){
+        if (result){
+            throw NikotorValidationException(reasons.toString(), reasons)
+        }
+    }
 }
+
 
 
 /**
@@ -47,8 +52,6 @@ interface Command<out Payload, CommandResult>{
      */
     fun validate(): ValidationResult
 
-    // TODO: Not happy at all with this * invariance
-    fun  generateEvent(result:CommandResult): NikotorEvent<*>
 
     /**
      * Warning: should not modify the projections !
@@ -61,16 +64,22 @@ interface Command<out Payload, CommandResult>{
      * If `run()` throws exception without returning a result, you probably want a #ThrowableCommand
      *
      */
-    fun run(): CompletableFuture<CommandResult>
+    fun run(): Await<CommandResult>
 
+    // TODO: Not happy at all with this * invariance
+    fun  generateEvent(result:CommandResult): NikotorEvent<*>
 
+    // TODO: Command should return many events ?
 }
+
+
+
 
 abstract class ThrowableCommand<out Payload>(override val payload: Payload) :Command<Payload, Unit> {
 
-    override fun run():CompletableFuture<Unit>{
+    override fun run():Await<Unit>{
         runUnit()
-        return futureUnit
+        return awaitUnit
     }
 
     abstract fun runUnit()
@@ -94,7 +103,7 @@ abstract class SimpleCommand<out Payload>(override val payload: Payload) :Comman
 
     abstract fun generateEvent(): NikotorEvent<*>
 
-    override fun run(): CompletableFuture<Unit> = futureUnit
+    override fun run(): CompletableFuture<Unit> = awaitUnit
 }
 
 
@@ -103,11 +112,14 @@ abstract class SimpleCommand<out Payload>(override val payload: Payload) :Comman
 
 interface NikotorEvent<EventPayload> {
     val type: String
-    val technicalDate: Long // the date when the event was really created
+    /**
+     * the date when the event was really created, or any pertinent date of your choice
+     */
+    val technicalDate: Long
     val payload: EventPayload // the business information related to the event
 }
 
-data class NikEvent<P>(override val type: String, override val payload: P) :NikotorEvent<P>{
+data class SimpleEvent<P>(override val type: String, override val payload: P) :NikotorEvent<P>{
     override val technicalDate = Date().time
 }
 

@@ -16,13 +16,13 @@ class AsyncTest {
 
     @Test
     fun testNow() {
-        val result = futureNow(12);
+        val result = awaitNow(12);
         assertEquals(12, result.get())
     }
 
     @Test
     fun testUnit() {
-        val result = futureUnit
+        val result = awaitUnit
         assertEquals(Unit, result.get())
     }
 

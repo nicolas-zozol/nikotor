@@ -2,9 +2,9 @@ package io.robusta.nikotor
 
 import java.util.concurrent.CompletableFuture
 
-typealias Try<T> = CompletableFuture<T>
-val futureUnit = CompletableFuture.completedFuture( Unit)!!
+typealias Await<T> = CompletableFuture<T>
+val awaitUnit = CompletableFuture.completedFuture( Unit)!!
 
-fun <T>futureNow(any:T):Try<T>{
+fun <T>awaitNow(any:T):Await<T>{
     return CompletableFuture.completedFuture(any)
 }

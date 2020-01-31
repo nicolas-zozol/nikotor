@@ -29,7 +29,7 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
 
 }
 
-data class TokenPayload (val email: String,val token: String){}
+data class TokenPayload (override val email: String,val token: String):HasEmail{}
 
 
 class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand<TokenPayload>( payload) {
@@ -53,8 +53,8 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
     }
 }
 
-interface PasswordPayload{
-    val email : String
+interface PasswordPayload:HasEmail{
+    override val email : String
     /**
      * Hashed password !!!!
      */
@@ -105,13 +105,13 @@ class AskPasswordResetCommand(override val payload: EmailPayload): Command<Email
 
 }
 
-data class UserPayload(val user:User){}
-class UpdateUserCommand(override val payload: UserPayload):Command<UserPayload,UserPayload>{
-    override fun run():Await<UserPayload> {
-        val email = payload.user.email
+
+class UpdateUserCommand(override val payload: User):Command<User,User>{
+    override fun run():Await<User> {
+        val email = payload.email
         val originalUser = queryUserByEmail(email).get() ?:throw NotFoundException("User $email not found")
         // setting password into the DTO that will be the EventPayload
-        payload.user.password=originalUser.password
+        payload.password=originalUser.password
         return awaitNow(payload)
 
     }
@@ -119,19 +119,33 @@ class UpdateUserCommand(override val payload: UserPayload):Command<UserPayload,U
     override fun validate(): ValidationResult {
         // There should not be the password in it !
         return ValidationResult()
-            .check( payload.user.email.isNotEmpty(), "Email is empty")
-            .check( payload.user.password?.isEmpty() ?: true, "Password should be empty")
+            .check( payload.email.isNotEmpty(), "Email is empty")
+            .check( payload.password?.isEmpty() ?: true, "Password should be empty")
     }
 
-    override fun generateEvent(result: UserPayload): NikotorEvent<*> {
-        check(!result.user.password.isNullOrEmpty())
+    override fun generateEvent(result: User): NikotorEvent<*> {
+        check(!result.password.isNullOrEmpty())
         return SimpleEvent(UserEvents.USER_UPDATED, result)
     }
 
 }
 
 
+class RemoveUserCommand(override val payload: EmailPayload):ThrowableCommand<EmailPayload>(payload){
+    override fun runUnit() {
+        val email = payload.email
+        queryUserByEmail(email).get() ?: throw NikotorValidationException("email $email does not exist")
+    }
 
+    override fun validate(): ValidationResult {
+        return ValidationResult()
+    }
+
+    override fun generateEvent(): NikotorEvent<*> {
+        return SimpleEvent(UserEvents.USER_REMOVED, payload)
+    }
+
+}
 
 
 

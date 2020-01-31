@@ -3,6 +3,10 @@ package io.robusta.nikotor.user
 import java.time.Instant
 import java.util.*
 
+interface HasEmail{
+    val email:String
+}
+
 abstract class AbstractAuditingEntity {
 
     var createdBy: String? = null
@@ -15,7 +19,7 @@ abstract class AbstractAuditingEntity {
 /**
  * User email is both database key and login
  */
-class User(val email: String) : AbstractAuditingEntity() {
+class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
 
     var password: String? = null

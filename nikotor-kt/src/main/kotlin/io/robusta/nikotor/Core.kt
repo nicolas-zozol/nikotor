@@ -149,6 +149,8 @@ interface EventStore {
 
 interface ProjectionUpdater {
     fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void>
+
+    val concernedEvents:List<String>
 }
 
 interface NikotorSubscriber {

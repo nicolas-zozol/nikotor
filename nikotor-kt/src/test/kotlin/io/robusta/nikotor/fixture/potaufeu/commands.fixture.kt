@@ -13,7 +13,7 @@ class StartCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>(payload){
     override fun validate(): ValidationResult {
 
         return ValidationResult()
-                .check("ingredients", payload.ingredients.isNotEmpty(), "Ingredients should not be empty")
+                .check(payload.ingredients.isNotEmpty(), "Ingredients should not be empty")
     }
 }
 

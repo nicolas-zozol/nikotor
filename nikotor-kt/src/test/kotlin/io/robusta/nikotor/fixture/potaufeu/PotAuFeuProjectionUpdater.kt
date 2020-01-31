@@ -9,6 +9,8 @@ val potAuFeuDatabase = mutableMapOf<Int, PotAuFeu>()
 
 
 object potAuFeuProjectionUpdater: ProjectionUpdater{
+    override val concernedEvents = listOf(PotAuFeuEvents.POT_AU_FEU_STARTED)
+
     override fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void> {
 
         val nextIndex = potAuFeuDatabase.size +1

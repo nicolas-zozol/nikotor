@@ -2,7 +2,6 @@ package io.robusta.nikotor.user
 
 import io.robusta.nikotor.PersistedEvent
 import io.robusta.nikotor.ProjectionUpdater
-import io.robusta.nikotor.user.User
 import java.util.concurrent.CompletableFuture
 
 public val usersDatabase = mutableMapOf<String, User>()
@@ -13,6 +12,7 @@ fun getDatabase(): MutableMap<String, User> {
 
 class UsersProjectionUpdater() : ProjectionUpdater {
     override val concernedEvents: List<String> = listOf(
+        UserEvents.USER_REGISTERED,
         UserEvents.ASK_PASSWORD_RESET,
         UserEvents.USER_ACTIVATED,
         UserEvents.PASSWORD_UPDATED,
@@ -24,15 +24,8 @@ class UsersProjectionUpdater() : ProjectionUpdater {
     override fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void> {
 
 
-        val user = queryUserByEmail(event.payload.e)
-        when(event.type){
-            UserEvents.ASK_PASSWORD_RESET -> {}
-            when (event.payload is EmailPayload){
-
-            }
-
-            UserEvents.USER_ACTIVATED ->
-        }
+        val nextIndex = usersDatabase.size +1
+        return CompletableFuture();
 
     }
 

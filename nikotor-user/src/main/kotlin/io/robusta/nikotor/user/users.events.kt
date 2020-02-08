@@ -1,6 +1,9 @@
 package io.robusta.nikotor.user
 
+import io.robusta.nikotor.NikotorEvent
 import io.robusta.nikotor.PersistedEvent
+import io.robusta.nikotor.PersistedNikEvent
+import java.time.Instant
 
 
 object UserEvents {
@@ -13,8 +16,11 @@ object UserEvents {
 }
 
 
-
-data class UserRegisteredEvent(override val payload:User):Nikotor<User>{
+open class UserRegisteredEvent(override val payload: User) : NikotorEvent<User> {
+    override val technicalDate = Instant.now().toEpochMilli()
     override val type: String
         get() = UserEvents.USER_REGISTERED
 }
+
+val john = User("john@doe.com")
+data class PersistedUserRegisteredEvent(override val payload: User, override val sequenceId: Long):UserRegisteredEvent(payload), PersistedEvent<User>

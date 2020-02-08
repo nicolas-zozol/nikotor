@@ -7,7 +7,12 @@ interface HasEmail{
     val email:String
 }
 
-abstract class AbstractAuditingEntity {
+// Don't use this. Use concept of Decorator, ie Modification
+interface Auditable{
+
+}
+
+abstract class AbstractAuditingEntity:Auditable {
 
     var createdBy: String? = null
     var createdDate = Instant.now()

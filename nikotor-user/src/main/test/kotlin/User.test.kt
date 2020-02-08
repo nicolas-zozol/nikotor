@@ -1,5 +1,5 @@
 import io.robusta.nikotor.InMemoryEventStore
-import io.robusta.nikotor.NikotorEngine
+import io.robusta.nikotor.core.NikotorEngine
 import io.robusta.nikotor.SimpleNikotorEngine
 import io.robusta.nikotor.user.UsersProjectionUpdater
 import io.robusta.nikotor.user.usersDatabase

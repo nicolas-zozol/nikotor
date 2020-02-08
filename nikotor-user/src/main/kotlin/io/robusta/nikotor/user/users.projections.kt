@@ -1,7 +1,7 @@
 package io.robusta.nikotor.user
 
-import io.robusta.nikotor.PersistedEvent
-import io.robusta.nikotor.ProjectionUpdater
+import io.robusta.nikotor.core.PersistedEvent
+import io.robusta.nikotor.core.ProjectionUpdater
 import java.util.concurrent.CompletableFuture
 
 public val usersDatabase = mutableMapOf<String, User>()

@@ -1,14 +1,14 @@
 package io.robusta.nikotor.fixture.potaufeu
 
-import io.robusta.nikotor.PersistedEvent
-import io.robusta.nikotor.ProjectionUpdater
+import io.robusta.nikotor.core.PersistedEvent
+import io.robusta.nikotor.core.ProjectionUpdater
 import java.util.concurrent.CompletableFuture
 
 // id, object
 val potAuFeuDatabase = mutableMapOf<Int, PotAuFeu>()
 
 
-object potAuFeuProjectionUpdater: ProjectionUpdater{
+object potAuFeuProjectionUpdater: ProjectionUpdater {
     override val concernedEvents = listOf(PotAuFeuEvents.POT_AU_FEU_STARTED)
 
     override fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void> {

@@ -1,5 +1,8 @@
-package io.robusta.nikotor
+package io.robusta.nikotor.core
 
+import io.robusta.nikotor.Await
+import io.robusta.nikotor.NikotorValidationException
+import io.robusta.nikotor.awaitUnit
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -7,24 +10,23 @@ import java.util.concurrent.CompletableFuture
  * @result: true if validation succeed
  * @reasons: Map of key / errors on the key
  */
-class ValidationResult(var result:Boolean=true){
+class ValidationResult(var result: Boolean = true) {
 
     private val reasons = mutableListOf<String>()
-    fun check(condition:Boolean, reason:String): ValidationResult{
-        if (!condition){
-            result= false
-            reasons+= reason
+    fun check(condition: Boolean, reason: String): ValidationResult {
+        if (!condition) {
+            result = false
+            reasons += reason
         }
         return this
     }
 
-    fun throwIfInvalid(){
-        if (result){
+    fun throwIfInvalid() {
+        if (result) {
             throw NikotorValidationException(reasons.toString(), reasons)
         }
     }
 }
-
 
 
 /**
@@ -39,7 +41,7 @@ class ValidationResult(var result:Boolean=true){
  *
  * Some Command (#SimpleCommand, #ThrowableCommand) return a kotlin Unit result
  */
-interface Command<out Payload, CommandResult>{
+interface Command<out Payload, CommandResult> {
 
     val payload: Payload
     /**
@@ -67,28 +69,27 @@ interface Command<out Payload, CommandResult>{
     fun run(): Await<CommandResult>
 
     // TODO: Not happy at all with this * invariance
-    fun  generateEvent(result:CommandResult): NikotorEvent<*>
+    fun generateEvent(result: CommandResult): Event<*>
 
     // TODO: Command should return many events ?
 }
 
 
+abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
+    Command<Payload, Unit> {
 
-
-abstract class ThrowableCommand<out Payload>(override val payload: Payload) :Command<Payload, Unit> {
-
-    override fun run():Await<Unit>{
+    override fun run(): Await<Unit> {
         runUnit()
         return awaitUnit
     }
 
     abstract fun runUnit()
 
-    override fun generateEvent(result: Unit): NikotorEvent<*> {
+    override fun generateEvent(result: Unit): Event<*> {
         return this.generateEvent()
     }
 
-    abstract fun generateEvent(): NikotorEvent<*>
+    abstract fun generateEvent(): Event<*>
 
 
 }
@@ -96,22 +97,21 @@ abstract class ThrowableCommand<out Payload>(override val payload: Payload) :Com
 /**
  * Command that does not run anything. Therefore the generated event is predictive if validation is
  */
-abstract class SimpleCommand<out Payload>(override val payload: Payload) :Command<Payload, Unit> {
-    override fun generateEvent(result: Unit): NikotorEvent<*> {
+abstract class SimpleCommand<out Payload>(override val payload: Payload) :
+    Command<Payload, Unit> {
+    override fun generateEvent(result: Unit): Event<*> {
         return this.generateEvent()
     }
 
-    abstract fun generateEvent(): NikotorEvent<*>
+    abstract fun generateEvent(): Event<*>
 
     override fun run(): CompletableFuture<Unit> = awaitUnit
 }
 
 
-
-
-
-interface NikotorEvent<EventPayload> {
+interface Event<EventPayload> {
     val type: String
+    val id: String
     /**
      * the date when the event was really created, or any pertinent date of your choice
      */
@@ -119,50 +119,40 @@ interface NikotorEvent<EventPayload> {
     val payload: EventPayload // the business information related to the event
 }
 
-data class SimpleEvent<P>(override val type: String, override val payload: P) :NikotorEvent<P>{
+data class SimpleEvent<P>(override val payload: P) : Event<P> {
+
+    override val type = this.findType()
+    override val id = UUID.randomUUID().toString()
     override val technicalDate = Date().time
+
+    private fun findType(): String {
+        return this.javaClass.name
+    }
 }
 
-data class PersistedNikEvent<P>(
-    override val sequenceId: Long,
-    override val type: String,
-    override val technicalDate: Long,
-    override val payload: P
-) : PersistedEvent<P>
 
-interface PersistedEvent<EventPayload> : NikotorEvent<EventPayload> {
-    val sequenceId: Long
-}
 
-typealias Events = List<NikotorEvent<*>>
-typealias PersistedEvents = List<PersistedEvent<*>>
-
-interface EventStore {
-    fun  <P>persist(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<*>>
-
-    fun persistAll(events: Events): CompletableFuture<PersistedEvents>
-
-    fun loadInitialEvents(): CompletableFuture<PersistedEvents>
-
-    fun resetWith(events: Events): CompletableFuture<PersistedEvents>
-}
+​
 
 interface ProjectionUpdater {
-    fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void>
+    fun updateWithEvent(event: PersistedEvent<*,*>): CompletableFuture<Void>
 
-    val concernedEvents:List<String>
+    val concernedEvents: List<String>
 }
 
 interface NikotorSubscriber {
     val id: Long
-    fun <EventPayload> reactTo(event: NikotorEvent<EventPayload>): Void
+    fun <EventPayload> reactTo(event: Event<EventPayload>): Void
 }
 
 interface NikotorEngine {
 
-    fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>>
+    fun <Payload, CommandResult> process(
+        command: Command<Payload, CommandResult>
+    ): CompletableFuture<PersistedEvent<*, *>>
+
     fun subscribe(newSubscriber: NikotorSubscriber): Void
     fun unsubscribe(oldSubscriber: NikotorSubscriber): Void
-    val eventStore:EventStore
+    val eventStore: EventStore
 
 }

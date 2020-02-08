@@ -1,6 +1,7 @@
 package io.robusta.nikotor
 
 
+import io.robusta.nikotor.core.NikotorEngine
 import io.robusta.nikotor.fixture.potaufeu.*
 import org.junit.Before
 import org.junit.Test

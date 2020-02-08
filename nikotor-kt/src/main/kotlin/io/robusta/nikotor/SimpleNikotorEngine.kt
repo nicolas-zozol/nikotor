@@ -1,5 +1,6 @@
 package io.robusta.nikotor
 
+import io.robusta.nikotor.core.*
 import java.lang.Exception
 import java.util.concurrent.CompletableFuture
 
@@ -7,11 +8,11 @@ import java.util.concurrent.CompletableFuture
  * Very simple engine with InMemoryEventStore and no subscription
  */
 class SimpleNikotorEngine(
-        override val eventStore: EventStore = InMemoryEventStore(),
-        private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
+    override val eventStore: EventStore = InMemoryEventStore(),
+    private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
-    override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>> {
+    override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*, *>> {
 
         command.validate().throwIfInvalid()
 
@@ -30,7 +31,7 @@ class SimpleNikotorEngine(
         }
     }
 
-    private fun update(persistedEvent: PersistedEvent<*>){
+    private fun update(persistedEvent: PersistedEvent<*, *>){
         projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent) }
     }
 

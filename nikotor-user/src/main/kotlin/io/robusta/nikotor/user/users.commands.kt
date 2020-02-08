@@ -1,6 +1,7 @@
 package io.robusta.nikotor.user
 
 import io.robusta.nikotor.*
+import io.robusta.nikotor.core.*
 import java.util.*
 
 
@@ -23,7 +24,7 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
     }
 
 
-    override fun generateEvent(): NikotorEvent<*> {
+    override fun generateEvent(): Event<*> {
         return SimpleEvent(UserEvents.USER_REGISTERED, payload)
     }
 
@@ -48,7 +49,7 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
 
     }
 
-    override fun generateEvent(): NikotorEvent<*> {
+    override fun generateEvent(): Event<*> {
         return SimpleEvent(UserEvents.USER_ACTIVATED, payload)
     }
 }
@@ -78,7 +79,7 @@ class ChangePasswordCommand(override val payload: PasswordPayload): ThrowableCom
 
     }
 
-    override fun generateEvent(): NikotorEvent<*> {
+    override fun generateEvent(): Event<*> {
         return SimpleEvent(UserEvents.PASSWORD_UPDATED, payload)
     }
 
@@ -88,7 +89,8 @@ interface EmailPayload{
     val email:String
 }
 
-class AskPasswordResetCommand(override val payload: EmailPayload): Command<EmailPayload, TokenPayload>{
+class AskPasswordResetCommand(override val payload: EmailPayload):
+    Command<EmailPayload, TokenPayload> {
 
     override fun validate(): ValidationResult {
         return ValidationResult().check( payload.email.isNotEmpty(), "Email is empty")
@@ -99,14 +101,14 @@ class AskPasswordResetCommand(override val payload: EmailPayload): Command<Email
         return awaitNow(TokenPayload(payload.email, token))
     }
 
-    override fun generateEvent(result: TokenPayload): NikotorEvent<*> {
+    override fun generateEvent(result: TokenPayload): Event<*> {
         return SimpleEvent(UserEvents.ASK_PASSWORD_RESET, result)
     }
 
 }
 
 
-class UpdateUserCommand(override val payload: User):Command<User,User>{
+class UpdateUserCommand(override val payload: User): Command<User, User> {
     override fun run():Await<User> {
         val email = payload.email
         val originalUser = queryUserByEmail(email).get() ?:throw NotFoundException("User $email not found")
@@ -123,7 +125,7 @@ class UpdateUserCommand(override val payload: User):Command<User,User>{
             .check( payload.password?.isEmpty() ?: true, "Password should be empty")
     }
 
-    override fun generateEvent(result: User): NikotorEvent<*> {
+    override fun generateEvent(result: User): Event<*> {
         check(!result.password.isNullOrEmpty())
         return SimpleEvent(UserEvents.USER_UPDATED, result)
     }
@@ -131,7 +133,7 @@ class UpdateUserCommand(override val payload: User):Command<User,User>{
 }
 
 
-class RemoveUserCommand(override val payload: EmailPayload):ThrowableCommand<EmailPayload>(payload){
+class RemoveUserCommand(override val payload: EmailPayload): ThrowableCommand<EmailPayload>(payload){
     override fun runUnit() {
         val email = payload.email
         queryUserByEmail(email).get() ?: throw NikotorValidationException("email $email does not exist")
@@ -141,7 +143,7 @@ class RemoveUserCommand(override val payload: EmailPayload):ThrowableCommand<Ema
         return ValidationResult()
     }
 
-    override fun generateEvent(): NikotorEvent<*> {
+    override fun generateEvent(): Event<*> {
         return SimpleEvent(UserEvents.USER_REMOVED, payload)
     }
 

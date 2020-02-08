@@ -1,14 +1,16 @@
 package io.robusta.nikotor
 
+
+
+import io.robusta.nikotor.core.*
 import java.util.concurrent.CompletableFuture
 
 class InMemoryEventStore : EventStore {
-    val events: MutableList<PersistedNikEvent<*>> = ArrayList()
+    val events: MutableList<Persisted> = ArrayList()
 
-    override fun <P> persist(event: NikotorEvent<P>): CompletableFuture<PersistedEvent<*>> {
+    override fun <P> persist(event: Event<P>): CompletableFuture<Persisted> {
 
-        val persistedEvent =
-            PersistedNikEvent((events.size + 1).toLong(), event.type, event.technicalDate, event.payload)
+        val persistedEvent = SequencePersisted(event)
         events.add(persistedEvent)
         return CompletableFuture.completedFuture(persistedEvent)
 
@@ -16,9 +18,9 @@ class InMemoryEventStore : EventStore {
 
     override fun persistAll(events: Events): CompletableFuture<PersistedEvents> {
         val list = events.map { e -> persist(e) }
-        return CompletableFuture
-            .allOf(*list.toTypedArray())
+        return CompletableFuture.allOf(*list.toTypedArray())
             .thenApply { list.map { future -> future.get() } }
+
     }
 
 

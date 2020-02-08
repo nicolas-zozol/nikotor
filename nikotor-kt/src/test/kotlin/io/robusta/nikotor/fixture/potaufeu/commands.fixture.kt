@@ -1,11 +1,11 @@
 package io.robusta.nikotor.fixture.potaufeu
 
-import io.robusta.nikotor.SimpleCommand
-import io.robusta.nikotor.NikotorEvent
-import io.robusta.nikotor.ValidationResult
+import io.robusta.nikotor.core.SimpleCommand
+import io.robusta.nikotor.core.Event
+import io.robusta.nikotor.core.ValidationResult
 
 class StartCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>(payload){
-    override fun generateEvent(): NikotorEvent<PotAuFeu> {
+    override fun generateEvent(): Event<PotAuFeu> {
         return potAuFeuStarted
     }
 
@@ -18,7 +18,7 @@ class StartCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>(payload){
 }
 
 class EndCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>(payload){
-    override fun generateEvent(): NikotorEvent<PotAuFeu> {
+    override fun generateEvent(): Event<PotAuFeu> {
         return potAuFeuStarted
     }
 

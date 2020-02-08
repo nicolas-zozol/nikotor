@@ -1,7 +1,7 @@
 package io.robusta.nikotor.fixture.potaufeu
 
-import io.robusta.nikotor.SimpleEvent
-import io.robusta.nikotor.NikotorEvent
+import io.robusta.nikotor.core.SimpleEvent
+import io.robusta.nikotor.core.Event
 import java.util.*
 
 object PotAuFeuEvents{
@@ -12,7 +12,7 @@ object PotAuFeuEvents{
 }
 
 
-class PotAuFeuEventStarted (override val payload: PotAuFeu):NikotorEvent<PotAuFeu>{
+class PotAuFeuEventStarted (override val payload: PotAuFeu): Event<PotAuFeu> {
     override val type = PotAuFeuEvents.POT_AU_FEU_STARTED
     override val technicalDate = Date().time
 }

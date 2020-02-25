@@ -50,7 +50,7 @@ class InMemoryEventStoreTest {
             .thenApply { store.persist(potAuFeuEnded) }
             .thenCompose { store.getAllEventsStartingFromIndex(1) }
         val value = future.get()[0]
-        assertSame(value.type, potAuFeuEnded.type)
+        assertSame(value.event.type, potAuFeuEnded.type)
 
 
     }

@@ -25,7 +25,7 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
 
 
     override fun generateEvent(): Event<*> {
-        return SimpleEvent(UserEvents.USER_REGISTERED, payload)
+        return SimpleEvent(payload)
     }
 
 }
@@ -50,7 +50,7 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
     }
 
     override fun generateEvent(): Event<*> {
-        return SimpleEvent(UserEvents.USER_ACTIVATED, payload)
+        return SimpleEvent(payload)
     }
 }
 
@@ -80,7 +80,7 @@ class ChangePasswordCommand(override val payload: PasswordPayload): ThrowableCom
     }
 
     override fun generateEvent(): Event<*> {
-        return SimpleEvent(UserEvents.PASSWORD_UPDATED, payload)
+        return SimpleEvent(payload)
     }
 
 }
@@ -102,7 +102,7 @@ class AskPasswordResetCommand(override val payload: EmailPayload):
     }
 
     override fun generateEvent(result: TokenPayload): Event<*> {
-        return SimpleEvent(UserEvents.ASK_PASSWORD_RESET, result)
+        return SimpleEvent(result)
     }
 
 }
@@ -127,7 +127,7 @@ class UpdateUserCommand(override val payload: User): Command<User, User> {
 
     override fun generateEvent(result: User): Event<*> {
         check(!result.password.isNullOrEmpty())
-        return SimpleEvent(UserEvents.USER_UPDATED, result)
+        return SimpleEvent(result)
     }
 
 }
@@ -144,7 +144,7 @@ class RemoveUserCommand(override val payload: EmailPayload): ThrowableCommand<Em
     }
 
     override fun generateEvent(): Event<*> {
-        return SimpleEvent(UserEvents.USER_REMOVED, payload)
+        return SimpleEvent(payload)
     }
 
 }

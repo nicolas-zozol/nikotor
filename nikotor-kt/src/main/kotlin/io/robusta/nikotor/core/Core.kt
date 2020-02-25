@@ -119,7 +119,7 @@ interface Event<EventPayload> {
     val payload: EventPayload // the business information related to the event
 }
 
-data class SimpleEvent<P>(override val payload: P) : Event<P> {
+open class SimpleEvent<P>(override val payload: P) : Event<P> {
 
     override val type = this.findType()
     override val id = UUID.randomUUID().toString()
@@ -130,12 +130,8 @@ data class SimpleEvent<P>(override val payload: P) : Event<P> {
     }
 }
 
-
-
-​
-
 interface ProjectionUpdater {
-    fun updateWithEvent(event: PersistedEvent<*,*>): CompletableFuture<Void>
+    fun updateWithEvent(event: Event<*>): CompletableFuture<Void>
 
     val concernedEvents: List<String>
 }

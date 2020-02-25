@@ -12,10 +12,7 @@ object PotAuFeuEvents{
 }
 
 
-class PotAuFeuEventStarted (override val payload: PotAuFeu): Event<PotAuFeu> {
-    override val type = PotAuFeuEvents.POT_AU_FEU_STARTED
-    override val technicalDate = Date().time
-}
+class PotAuFeuEventStarted (override val payload: PotAuFeu): SimpleEvent<PotAuFeu>(payload)
 
 val potAuFeuStarted = PotAuFeuEventStarted(PotAuFeu("Tomato, Beef, Lemon", 1500))
 

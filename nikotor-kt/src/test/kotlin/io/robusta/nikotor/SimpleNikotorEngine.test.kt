@@ -13,7 +13,7 @@ class NikotorEngineTest {
 
     lateinit var store: InMemoryEventStore
     lateinit var engine: NikotorEngine
-    private val updater = potAuFeuProjectionUpdater
+    private val updater = PotAuFeuProjectionUpdater
 
     @Before
     fun init() {
@@ -37,7 +37,7 @@ class NikotorEngineTest {
     @Test
     fun processFailValidation() {
         assert(potAuFeuDatabase.isEmpty())
-        assertThrows<NikotorValidationException> { engine.process(StartCommand(badPotAuFeu)) }
+        assertThrows<NikotorValidationException> { engine.process(StartCommand(potAuFeuStart)) }
         assert(potAuFeuDatabase.isEmpty())
     }
 

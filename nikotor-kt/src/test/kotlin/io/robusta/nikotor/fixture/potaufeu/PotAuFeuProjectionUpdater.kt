@@ -1,28 +1,29 @@
 package io.robusta.nikotor.fixture.potaufeu
 
 import io.robusta.nikotor.core.Event
-import io.robusta.nikotor.core.PersistedEvent
 import io.robusta.nikotor.core.ProjectionUpdater
+import io.robusta.nikotor.data.DataSet
 import java.util.concurrent.CompletableFuture
 
 // id, object
-val potAuFeuDatabase = mutableMapOf<Int, PotAuFeu>()
+val potAuFeuDatabase = DataSet<PotAuFeu>()
 
 
-object potAuFeuProjectionUpdater: ProjectionUpdater {
-    override val concernedEvents = listOf(PotAuFeuEvents.POT_AU_FEU_STARTED)
+object PotAuFeuProjectionUpdater: ProjectionUpdater {
+    override val concernedEvents = listOf(
+            PotAuFeuEventStarted::class.java,
+            PotAuFeuWork::class.java)
 
     override fun  updateWithEvent(event: Event<*>): CompletableFuture<Void> {
 
-        val nextIndex = potAuFeuDatabase.size +1
-        when(event.type){
-            PotAuFeuEventStarted-> {
+        when(event){
+            is PotAuFeuEventStarted-> {
                 val payload = event.payload
-                potAuFeuDatabase[nextIndex]=payload
+                potAuFeuDatabase.add(payload)
             }
         }
 
-        return CompletableFuture.runAsync {  }
+        return CompletableFuture()
 
     }
 

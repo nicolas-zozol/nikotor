@@ -1,22 +1,28 @@
 package io.robusta.nikotor.user
 
 
+import io.robusta.nikotor.core.PayloadId
 import io.robusta.nikotor.core.SimpleEvent
-import java.time.Instant
+import java.util.*
 
 
-object UserEvents {
-    const val USER_REGISTERED = "USER_REGISTERED"
-    const val USER_ACTIVATED = "USER_ACTIVATED"
-    const val PASSWORD_UPDATED = "PASSWORD_UPDATED"
-    const val ASK_PASSWORD_RESET = "ASK_PASSWORD_RESET"
-    const val USER_UPDATED = "USER_UPDATED"
-    const val USER_REMOVED = "USER_REMOVED"
-}
 
 
-class UserRegisteredEvent(payload: User) : SimpleEvent<User>(payload) {
-    override val technicalDate = Instant.now().toEpochMilli()
-    override val type: String
-        get() = UserEvents.USER_REGISTERED
-}
+typealias UserId = PayloadId
+
+class PasswordUpdatedPayload(val password:String, val id:String)
+class UserUpdatedPayload(val newUser:User, val previous:User, by:UserId, date:Date)
+data class TokenPayload (override val email: String,val token: String):HasEmail{}
+data class HasEmailPayload (override val email: String):HasEmail{}
+/**
+ * Hashed password !!!! it's up to the rest controller to hash it correctly
+ */
+data class HashedPasswordPayload(override val email : String,val password:String):HasEmail
+
+
+class UserRegisteredEvent(payload: User) : SimpleEvent<User>(payload)
+class UserActivatedEvent(payload: TokenPayload) : SimpleEvent<TokenPayload>(payload)
+class PasswordUpdatedEvent(payload: HashedPasswordPayload) : SimpleEvent<HashedPasswordPayload>(payload)
+class AskPasswordResetEvent(payload: HasEmailPayload) : SimpleEvent<HasEmailPayload>(payload)
+class UserUpdatedEvent(payload: User) : SimpleEvent<User>(payload)
+class UserRemovedEvent(payload: HasEmailPayload) : SimpleEvent<HasEmailPayload>(payload)

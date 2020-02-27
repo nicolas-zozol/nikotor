@@ -1,30 +1,34 @@
 package io.robusta.nikotor.user
 
-import io.robusta.nikotor.core.PersistedEvent
+import io.robusta.nikotor.core.Event
 import io.robusta.nikotor.core.ProjectionUpdater
+import io.robusta.nikotor.data.DataSet
 import java.util.concurrent.CompletableFuture
 
-public val usersDatabase = mutableMapOf<String, User>()
+val usersDatabase = DataSet<User>()
 
-fun getDatabase(): MutableMap<String, User> {
-    return usersDatabase
-}
 
 class UsersProjectionUpdater() : ProjectionUpdater {
-    override val concernedEvents: List<String> = listOf(
-        UserEvents.USER_REGISTERED,
-        UserEvents.ASK_PASSWORD_RESET,
-        UserEvents.USER_ACTIVATED,
-        UserEvents.PASSWORD_UPDATED,
-        UserEvents.ASK_PASSWORD_RESET,
-        UserEvents.USER_UPDATED,
-        UserEvents.USER_REMOVED
-    )
+    override val concernedEvents = listOf(
+            UserRegisteredEvent::class.java,
+            PasswordUpdatedPayload::class.java,
+            UserUpdatedPayload::class.java,
+            UserActivatedEvent::class.java,
+            PasswordUpdatedEvent::class.java,
+            AskPasswordResetEvent::class.java,
+            UserUpdatedEvent::class.java,
+            UserRemovedEvent::class.java)
 
-    override fun <EventPayload> updateWithEvent(event: PersistedEvent<EventPayload>): CompletableFuture<Void> {
+    override fun  updateWithEvent(event: Event<*>): CompletableFuture<Void> {
 
 
-        val nextIndex = usersDatabase.size +1
+        when(event){
+            is UserRegisteredEvent-> {
+                val user = event.payload
+                //potAuFeuDatabase.add(payload)
+            }
+        }
+
         return CompletableFuture();
 
     }

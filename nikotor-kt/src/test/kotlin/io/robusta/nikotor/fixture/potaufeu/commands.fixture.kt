@@ -28,5 +28,5 @@ class EndCommand(payload: PotAuFeu): SimpleCommand<PotAuFeu>(payload){
     }
 }
 
-val startCommand = StartCommand(potAuFeu)
-val endCommand = EndCommand(potAuFeu)
+val startCommand = StartCommand(potAuFeuFinished)
+val endCommand = EndCommand(potAuFeuFinished)

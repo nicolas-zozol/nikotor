@@ -32,7 +32,7 @@ class SimpleNikotorEngine(
     }
 
     private fun update(persistedEvent: PersistedEvent<*, *>){
-        projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent) }
+        projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent.event) }
     }
 
 

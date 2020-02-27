@@ -76,7 +76,7 @@ interface Command<out Payload, CommandResult> {
 
 
 abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
-    Command<Payload, Unit> {
+        Command<Payload, Unit> {
 
     override fun run(): Await<Unit> {
         runUnit()
@@ -98,7 +98,7 @@ abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
  * Command that does not run anything. Therefore the generated event is predictive if validation is
  */
 abstract class SimpleCommand<out Payload>(override val payload: Payload) :
-    Command<Payload, Unit> {
+        Command<Payload, Unit> {
     override fun generateEvent(result: Unit): Event<*> {
         return this.generateEvent()
     }
@@ -119,7 +119,10 @@ interface Event<EventPayload> {
     val payload: EventPayload // the business information related to the event
 }
 
-open class SimpleEvent<P>(override val payload: P) : Event<P> {
+/**
+ * Abstract because the generated type should never be SimpleEvent. That's not precise enough.
+ */
+abstract class SimpleEvent<P>(override val payload: P) : Event<P> {
 
     override val type = this.findType()
     override val id = UUID.randomUUID().toString()
@@ -130,10 +133,13 @@ open class SimpleEvent<P>(override val payload: P) : Event<P> {
     }
 }
 
+class PayloadId(val id:String)
+
+
 interface ProjectionUpdater {
     fun updateWithEvent(event: Event<*>): CompletableFuture<Void>
 
-    val concernedEvents: List<String>
+    val concernedEvents: List<Class<*>>
 }
 
 interface NikotorSubscriber {
@@ -144,7 +150,7 @@ interface NikotorSubscriber {
 interface NikotorEngine {
 
     fun <Payload, CommandResult> process(
-        command: Command<Payload, CommandResult>
+            command: Command<Payload, CommandResult>
     ): CompletableFuture<PersistedEvent<*, *>>
 
     fun subscribe(newSubscriber: NikotorSubscriber): Void

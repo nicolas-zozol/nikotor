@@ -1,18 +1,20 @@
 package io.robusta.nikotor.user
 
+import io.robusta.nikotor.data.HasId
+import io.robusta.nikotor.data.SimpleEntity
 import java.time.Instant
 import java.util.*
 
-interface HasEmail{
-    val email:String
+interface HasEmail {
+    val email: String
 }
 
 // Don't use this. Use concept of Decorator, ie Modification
-interface Auditable{
+interface Auditable {
 
 }
 
-abstract class AbstractAuditingEntity:Auditable {
+abstract class AbstractAuditingEntity : SimpleEntity(), Auditable, HasId {
 
     var createdBy: String? = null
     var createdDate = Instant.now()
@@ -26,12 +28,13 @@ abstract class AbstractAuditingEntity:Auditable {
  */
 class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
+    override val id:String
+        get(){return this.email}
 
     var password: String? = null
     var firstName: String? = null
 
     var lastName: String? = null
-
 
     var activated = false
 

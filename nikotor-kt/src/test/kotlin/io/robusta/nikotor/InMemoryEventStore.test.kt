@@ -12,7 +12,7 @@ import kotlin.test.assertSame
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InMemoryEventStoreTest {
 
-    lateinit var store: InMemoryEventStore
+    private lateinit var store: InMemoryEventStore
 
     @Before
     fun init() {

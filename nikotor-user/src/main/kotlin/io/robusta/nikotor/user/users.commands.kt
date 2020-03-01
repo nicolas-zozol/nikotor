@@ -18,7 +18,9 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
 
     override fun runUnit() {
         val email = payload.email
-        queryUserByEmail(email).get() ?: throw IllegalStateException("email $email is already used")
+        if (queryUserByEmail(email).get() != null){
+            throw IllegalStateException("email $email is already used")
+        }
 
         // if event succeed, then run command SendActivationMailCommand
     }
@@ -31,6 +33,23 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
 }
 
 
+class AskActivationCommand(override val payload: HasEmailPayload):
+        Command<HasEmail, TokenPayload> {
+
+    override fun validate(): ValidationResult {
+        return ValidationResult().check( payload.email.isNotEmpty(), "Email is empty")
+    }
+
+    override fun run():Await<TokenPayload>{
+        val token = UUID.randomUUID().toString();
+        return awaitNow(TokenPayload(payload.email, token))
+    }
+
+    override fun generateEvent(result: TokenPayload): Event<*> {
+        return AskPasswordResetEvent(HasEmailPayload(result.email))
+    }
+
+}
 
 class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand<TokenPayload>( payload) {
     override fun validate(): ValidationResult {

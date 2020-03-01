@@ -8,11 +8,9 @@ import java.util.concurrent.CompletableFuture
 val usersDatabase = DataSet<User>()
 
 
-class UsersProjectionUpdater() : ProjectionUpdater {
+class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
     override val concernedEvents = listOf(
             UserRegisteredEvent::class.java,
-            PasswordUpdatedPayload::class.java,
-            UserUpdatedPayload::class.java,
             UserActivatedEvent::class.java,
             PasswordUpdatedEvent::class.java,
             AskPasswordResetEvent::class.java,
@@ -24,7 +22,9 @@ class UsersProjectionUpdater() : ProjectionUpdater {
 
         when(event){
             is UserRegisteredEvent-> {
-                val user = event.payload
+                usersDatabase.add(event.payload)
+                println(usersDatabase)
+                // in subscriber: create AskActivationCommand
                 //potAuFeuDatabase.add(payload)
             }
         }

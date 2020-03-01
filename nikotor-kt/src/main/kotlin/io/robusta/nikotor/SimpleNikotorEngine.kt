@@ -20,6 +20,7 @@ class SimpleNikotorEngine(
         try {
             result = command.run().get()
             val event = command.generateEvent(result)
+            // todo: problem with a catch
             val future = eventStore.persist(event)
             future.thenAccept { update(it) }
             return future

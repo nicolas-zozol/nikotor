@@ -24,7 +24,7 @@ class DataSet<Entity> where Entity : HasId {
 
 
     fun add(element: Entity) {
-        if (this.map[element.id] == null) {
+        if (this.map[element.id] != null) {
             throw IllegalStateException("Element with id " + element.id + " is already existing")
         }
         this.map[element.id] = element

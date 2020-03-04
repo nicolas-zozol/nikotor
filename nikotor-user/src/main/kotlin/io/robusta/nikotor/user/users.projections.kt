@@ -17,11 +17,11 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
             UserUpdatedEvent::class.java,
             UserRemovedEvent::class.java)
 
-    override fun  updateWithEvent(event: Event<*>): CompletableFuture<Void> {
+    override suspend fun updateWithEvent(event: Event<*>) {
 
 
-        when(event){
-            is UserRegisteredEvent-> {
+        when (event) {
+            is UserRegisteredEvent -> {
                 usersDatabase.add(event.payload)
                 println(usersDatabase)
                 // in subscriber: create AskActivationCommand
@@ -29,7 +29,6 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
             }
         }
 
-        return CompletableFuture();
 
     }
 

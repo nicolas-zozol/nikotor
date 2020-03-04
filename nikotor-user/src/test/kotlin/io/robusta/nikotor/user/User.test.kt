@@ -1,5 +1,7 @@
 package io.robusta.nikotor.user
 
+import kotlinx.coroutines.*
+
 import io.robusta.nikotor.InMemoryEventStore
 import io.robusta.nikotor.core.NikotorEngine
 import io.robusta.nikotor.SimpleNikotorEngine
@@ -12,7 +14,6 @@ import io.robusta.nikotor.user.usersDatabase
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
-
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,14 +31,16 @@ class UsersFeatureTest {
     }
 
     @Test
-    fun testRegister(){
-        val event = engine
-                .process(registerJohn)
-                .thenAccept {engine.process(registerJane)}
-                .get()
-        assert(store.events.size == 2)
-        assert(usersDatabase.find(johnDoe.email) == johnDoe)
+    fun testRegister() {
+        runBlocking {
 
+            val event1 = engine.process(registerJohn)
+            val event2 = engine.process(registerJane)
+
+            assert(store.events.size == 2)
+            assert(usersDatabase.find(johnDoe.email) == johnDoe)
+
+        }
 
 
     }

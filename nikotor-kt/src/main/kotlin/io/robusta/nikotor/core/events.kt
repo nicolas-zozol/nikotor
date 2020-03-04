@@ -1,5 +1,8 @@
 package io.robusta.nikotor.core
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -34,12 +37,17 @@ class SequencePersisted<E, P>(event: E) : AbstractPersistedEvent<E, P>(event) wh
 
 
 interface EventStore {
-    fun <P> persist(event: Event<P>): CompletableFuture<PersistedEvent<*,*>>
+    suspend fun <P> persist(event: Event<P>): PersistedEvent<*,*>
 
-    fun persistAll(events: Events): CompletableFuture<PersistedEvents>
+    suspend fun persistAll(events: Events): PersistedEvents {
 
-    fun loadInitialEvents(): CompletableFuture<PersistedEvents>
+        return coroutineScope{
+            events.map { e -> async { persist(e) }}.awaitAll()
+        }
+    }
 
-    fun resetWith(events: Events): CompletableFuture<PersistedEvents>
+    suspend fun loadInitialEvents(): PersistedEvents
+
+    suspend fun resetWith(events: Events): PersistedEvents
 }
 

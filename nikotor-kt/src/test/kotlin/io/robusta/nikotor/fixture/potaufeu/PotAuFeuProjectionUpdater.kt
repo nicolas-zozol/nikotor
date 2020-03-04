@@ -9,22 +9,19 @@ import java.util.concurrent.CompletableFuture
 val potAuFeuDatabase = DataSet<PotAuFeu>()
 
 
-object PotAuFeuProjectionUpdater: ProjectionUpdater {
+object PotAuFeuProjectionUpdater : ProjectionUpdater {
     override val concernedEvents = listOf(
             PotAuFeuEventStarted::class.java,
             PotAuFeuWork::class.java)
 
-    override fun  updateWithEvent(event: Event<*>): CompletableFuture<Void> {
+    override suspend fun updateWithEvent(event: Event<*>) {
 
-        when(event){
-            is PotAuFeuEventStarted-> {
+        when (event) {
+            is PotAuFeuEventStarted -> {
                 val payload = event.payload
                 potAuFeuDatabase.add(payload)
             }
         }
-
-        return CompletableFuture()
-
     }
 
 }

@@ -12,7 +12,7 @@ class SimpleNikotorEngine(
     private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
-    override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*, *>> {
+    override suspend fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
 
         command.validate().throwIfInvalid()
 
@@ -21,9 +21,9 @@ class SimpleNikotorEngine(
             result = command.run().get()
             val event = command.generateEvent(result)
             // todo: problem with a catch
-            val future = eventStore.persist(event)
-            future.thenAccept { update(it) }
-            return future
+            val persistedEvent = eventStore.persist(event)
+            updateProjections(persistedEvent)
+            return persistedEvent
         } catch (nikException: NikotorException) {
             // detected error, just rethrow
             throw nikException
@@ -32,7 +32,7 @@ class SimpleNikotorEngine(
         }
     }
 
-    private fun update(persistedEvent: PersistedEvent<*, *>){
+    private suspend fun updateProjections(persistedEvent: PersistedEvent<*, *>){
         projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent.event) }
     }
 

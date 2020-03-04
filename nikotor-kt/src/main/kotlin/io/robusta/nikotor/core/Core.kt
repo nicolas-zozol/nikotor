@@ -137,7 +137,7 @@ class PayloadId(val id:String)
 
 
 interface ProjectionUpdater {
-    fun updateWithEvent(event: Event<*>): CompletableFuture<Void>
+    suspend fun updateWithEvent(event: Event<*>)
 
     val concernedEvents: List<Class<*>>
 }
@@ -149,9 +149,9 @@ interface NikotorSubscriber {
 
 interface NikotorEngine {
 
-    fun <Payload, CommandResult> process(
+    suspend fun <Payload, CommandResult> process(
             command: Command<Payload, CommandResult>
-    ): CompletableFuture<PersistedEvent<*, *>>
+    ): PersistedEvent<*, *>
 
     fun subscribe(newSubscriber: NikotorSubscriber): Void
     fun unsubscribe(oldSubscriber: NikotorSubscriber): Void

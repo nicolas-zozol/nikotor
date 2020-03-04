@@ -2,6 +2,7 @@ package io.robusta.nikotor
 
 import io.robusta.nikotor.core.*
 import java.lang.Exception
+import java.lang.IllegalStateException
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -19,8 +20,12 @@ class SimpleNikotorEngine(
         val result: CommandResult?
         try {
             result = command.run().get()
-            val event = command.generateEvent(result)
-            // todo: problem with a catch
+            val events = command.generateEvents(result)
+            if(events.size>1){
+                throw IllegalStateException("Multiple events not yet implemented iun SimpleEngine")
+            }
+            val event = events[0]
+            // todo: problem with a catch: check if ok with coroutines now
             val persistedEvent = eventStore.persist(event)
             updateProjections(persistedEvent)
             return persistedEvent

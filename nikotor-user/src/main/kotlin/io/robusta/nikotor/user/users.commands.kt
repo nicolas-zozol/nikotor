@@ -44,8 +44,8 @@ class AskActivationCommand(override val payload: HasEmailPayload):
         return awaitNow(TokenPayload(payload.email, token))
     }
 
-    override fun generateEvent(result: TokenPayload): Event<*> {
-        return AskPasswordResetEvent(HasEmailPayload(result.email))
+    override fun generateEvents(result: TokenPayload): Events {
+        return listOf(AskPasswordResetEvent(HasEmailPayload(result.email)))
     }
 
 }
@@ -110,8 +110,8 @@ class AskPasswordResetCommand(override val payload: HasEmailPayload):
         return awaitNow(TokenPayload(payload.email, token))
     }
 
-    override fun generateEvent(result: TokenPayload): Event<*> {
-        return AskPasswordResetEvent(HasEmailPayload(result.email))
+    override fun generateEvents(result: TokenPayload): Events {
+        return listOf(AskPasswordResetEvent(HasEmailPayload(result.email)))
     }
 
 }
@@ -134,9 +134,9 @@ class UpdateUserCommand(override val payload: User): Command<User, User> {
             .check( payload.password?.isEmpty() ?: true, "Password should be empty")
     }
 
-    override fun generateEvent(result: User): Event<*> {
+    override fun generateEvents(result: User): Events {
         check(!result.password.isNullOrEmpty())
-        return UserUpdatedEvent(result)
+        return listOf(UserUpdatedEvent(result))
     }
 
 }

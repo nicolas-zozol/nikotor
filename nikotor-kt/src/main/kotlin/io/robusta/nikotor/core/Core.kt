@@ -69,7 +69,8 @@ interface Command<out Payload, CommandResult> {
     fun run(): Await<CommandResult>
 
     // TODO: Not happy at all with this * invariance
-    fun generateEvent(result: CommandResult): Event<*>
+    fun generateEvents(result: CommandResult): Events
+    //fun generateEvent(result: CommandResult): Event<*>
 
     // TODO: Command should return many events ?
 }
@@ -85,8 +86,8 @@ abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
 
     abstract fun runUnit()
 
-    override fun generateEvent(result: Unit): Event<*> {
-        return this.generateEvent()
+    override fun generateEvents(result: Unit): Events {
+        return listOf(this.generateEvent())
     }
 
     abstract fun generateEvent(): Event<*>
@@ -99,8 +100,9 @@ abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
  */
 abstract class SimpleCommand<out Payload>(override val payload: Payload) :
         Command<Payload, Unit> {
-    override fun generateEvent(result: Unit): Event<*> {
-        return this.generateEvent()
+
+    override fun generateEvents(result: Unit): Events {
+        return listOf(this.generateEvent())
     }
 
     abstract fun generateEvent(): Event<*>

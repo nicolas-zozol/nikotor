@@ -28,8 +28,5 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
                 //potAuFeuDatabase.add(payload)
             }
         }
-
-
     }
-
 }

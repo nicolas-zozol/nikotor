@@ -8,6 +8,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NikotorEngineTest {
@@ -30,7 +31,7 @@ class NikotorEngineTest {
             assert(potAuFeuDatabase.isEmpty())
             val event = engine.process(startCommand)
             assert(store.events.size == 1)
-            assert(event.sequenceId == 1L)
+            assertEquals(event.sequenceId, 1L, "Expect 1L, got ${event.sequenceId}")
             assert(potAuFeuDatabase.size == 1)
         }
     }

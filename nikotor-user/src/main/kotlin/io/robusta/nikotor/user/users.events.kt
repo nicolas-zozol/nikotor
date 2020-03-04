@@ -10,8 +10,9 @@ import java.util.*
 
 typealias UserId = PayloadId
 
-class PasswordUpdatedPayload(val password:String, val id:String)
-class UserUpdatedPayload(val newUser:User, val previous:User, by:UserId, date:Date)
+data class RegisterPayload(val user:User, val password:String)
+data class WithPasswordPayload(val password:String, val email:String)
+data class UserUpdatedPayload(val newUser:User, val previous:User, val by:UserId,val date:Date)
 data class TokenPayload (override val email: String,val token: String):HasEmail{}
 data class HasEmailPayload (override val email: String):HasEmail{}
 /**

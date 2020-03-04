@@ -34,8 +34,8 @@ class UsersFeatureTest {
     fun testRegister() {
         runBlocking {
 
-            val event1 = engine.process(registerJohn)
-            val event2 = engine.process(registerJane)
+            engine.process(registerJohn)
+            engine.process(registerJane)
 
             assert(store.events.size == 2)
             assert(usersDatabase.find(johnDoe.email) == johnDoe)

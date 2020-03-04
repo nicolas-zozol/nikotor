@@ -5,19 +5,18 @@ import io.robusta.nikotor.core.*
 import java.util.*
 
 
-data class RegisterUserCommand(override val payload: User) : ThrowableCommand<User>( payload) {
+data class RegisterUserCommand(override val payload: RegisterPayload) : ThrowableCommand<RegisterPayload>( payload) {
 
 
     override fun validate(): ValidationResult {
-        val user = payload
 
         return ValidationResult()
-                .check(user.email.isNotEmpty(), "email is not valid")
-                .check(!user.password.isNullOrEmpty(), "password is not set")
+                .check(payload.user.email.isNotEmpty(), "email is not valid")
+                .check(payload.password.isNotEmpty(), "password is not set")
     }
 
     override fun runUnit() {
-        val email = payload.email
+        val email = payload.user.email
         if (queryUserByEmail(email).get() != null){
             throw IllegalStateException("email $email is already used")
         }
@@ -26,8 +25,8 @@ data class RegisterUserCommand(override val payload: User) : ThrowableCommand<Us
     }
 
 
-    override fun generateEvent(): Event<*> {
-        return UserRegisteredEvent(payload)
+    override fun generateEvent(): Event<User> {
+        return UserRegisteredEvent(User(payload.user.email))
     }
 
 }

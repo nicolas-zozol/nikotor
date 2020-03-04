@@ -22,7 +22,7 @@ class ValidationResult(var result: Boolean = true) {
     }
 
     fun throwIfInvalid() {
-        if (result) {
+        if (!result) {
             throw NikotorValidationException(reasons.toString(), reasons)
         }
     }
@@ -133,7 +133,7 @@ abstract class SimpleEvent<P>(override val payload: P) : Event<P> {
     }
 }
 
-class PayloadId(val id:String)
+class PayloadId(val id: String)
 
 
 interface ProjectionUpdater {

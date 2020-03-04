@@ -34,8 +34,8 @@ class FakeEmailSender() : EmailSender {
 /**
  * Commands using fixtures
  */
-val registerJohn = RegisterUserCommand(johnDoe);
-val registerJane = RegisterUserCommand(janeDoe);
+val registerJohn = RegisterUserCommand(RegisterPayload(johnDoe, "abc"));
+val registerJane = RegisterUserCommand(RegisterPayload(janeDoe, "abc"));
 val askActivation = AskActivationCommand(HasEmailPayload(johnDoe.email))
 val activate = ActivateUserCommand(TokenPayload(johnDoe.email, token))
 val changePassword = ChangePasswordCommand(HashedPasswordPayload(janeDoe.email, newPassword))

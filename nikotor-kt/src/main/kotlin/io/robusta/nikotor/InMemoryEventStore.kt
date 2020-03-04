@@ -12,6 +12,10 @@ import java.util.concurrent.CompletableFuture
 class InMemoryEventStore : EventStore {
     val events: MutableList<Persisted> = ArrayList()
 
+    constructor(){
+        LocalSequence.reset()
+    }
+
     override suspend fun <P> persist(event: Event<P>): Persisted {
 
         val persistedEvent = SequencePersisted(event)
@@ -28,7 +32,12 @@ class InMemoryEventStore : EventStore {
     }
 
     override suspend fun resetWith(events: Events): PersistedEvents {
-        this.events.clear()
+        this.reset()
         return this.persistAll(events)
+    }
+
+    private fun reset(){
+        this.events.clear()
+        LocalSequence.reset()
     }
 }

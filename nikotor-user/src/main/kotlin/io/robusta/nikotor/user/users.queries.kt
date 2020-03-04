@@ -1,14 +1,31 @@
 package io.robusta.nikotor.user
 
-import io.robusta.nikotor.Await
-import io.robusta.nikotor.awaitNow
+import kotlinx.coroutines.runBlocking
 
+val dao = UserDatasetDao()
 
-fun queryUserByEmail(email:String): Await<User?>{
-    return  awaitNow(usersDatabase.find(email))
+fun queryUserByEmail(email: String): User? {
+    return runBlocking {
+        dao.findByEmail(email)
+    }
 }
 
-fun queryHashedPassword(email:String): Await<String?>{
-    return  awaitNow(usersDatabase.find(email)).thenApply{it?.password}
+fun queryHashedPassword(email: String): String? {
+    return runBlocking {
+        dao.findByEmail(email)?.password
+    }
 }
+
+/**
+ * Associated DAO
+ */
+interface UserDao {
+
+    suspend fun findByEmail(email: String): User? {
+        return usersDatabase.find(email)
+    }
+
+}
+
+class UserDatasetDao : UserDao {}
 

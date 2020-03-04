@@ -19,7 +19,7 @@ class SimpleNikotorEngine(
 
         val result: CommandResult?
         try {
-            result = command.run().get()
+            result = command.run()
             val events = command.generateEvents(result)
             if(events.size>1){
                 throw IllegalStateException("Multiple events not yet implemented iun SimpleEngine")

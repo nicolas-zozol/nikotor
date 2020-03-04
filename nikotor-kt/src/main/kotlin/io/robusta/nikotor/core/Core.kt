@@ -1,8 +1,7 @@
 package io.robusta.nikotor.core
 
-import io.robusta.nikotor.Await
 import io.robusta.nikotor.NikotorValidationException
-import io.robusta.nikotor.awaitUnit
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -66,7 +65,7 @@ interface Command<out Payload, CommandResult> {
      * If `run()` throws exception without returning a result, you probably want a #ThrowableCommand
      *
      */
-    fun run(): Await<CommandResult>
+    suspend fun run(): CommandResult
 
     // TODO: Not happy at all with this * invariance
     fun generateEvents(result: CommandResult): Events
@@ -79,9 +78,8 @@ interface Command<out Payload, CommandResult> {
 abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
         Command<Payload, Unit> {
 
-    override fun run(): Await<Unit> {
+    override suspend fun run(): Unit {
         runUnit()
-        return awaitUnit
     }
 
     abstract fun runUnit()
@@ -107,7 +105,9 @@ abstract class SimpleCommand<out Payload>(override val payload: Payload) :
 
     abstract fun generateEvent(): Event<*>
 
-    override fun run(): CompletableFuture<Unit> = awaitUnit
+    override suspend fun run() {
+
+    }
 }
 
 

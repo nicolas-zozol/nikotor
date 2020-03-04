@@ -5,7 +5,7 @@ import io.robusta.nikotor.core.*
 import java.util.*
 
 
-data class RegisterUserCommand(override val payload: RegisterPayload) : ThrowableCommand<RegisterPayload>( payload) {
+data class RegisterUserCommand(override val payload: RegisterPayload) : ThrowableCommand<RegisterPayload>(payload) {
 
 
     override fun validate(): ValidationResult {
@@ -17,7 +17,7 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Throwabl
 
     override fun runUnit() {
         val email = payload.user.email
-        if (queryUserByEmail(email).get() != null){
+        if (queryUserByEmail(email) != null) {
             throw IllegalStateException("email $email is already used")
         }
 
@@ -32,16 +32,16 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Throwabl
 }
 
 
-class AskActivationCommand(override val payload: HasEmailPayload):
+class AskActivationCommand(override val payload: HasEmailPayload) :
         Command<HasEmail, TokenPayload> {
 
     override fun validate(): ValidationResult {
-        return ValidationResult().check( payload.email.isNotEmpty(), "Email is empty")
+        return ValidationResult().check(payload.email.isNotEmpty(), "Email is empty")
     }
 
-    override fun run():Await<TokenPayload>{
+    override suspend fun run(): TokenPayload {
         val token = UUID.randomUUID().toString();
-        return awaitNow(TokenPayload(payload.email, token))
+        return TokenPayload(payload.email, token)
     }
 
     override fun generateEvents(result: TokenPayload): Events {
@@ -50,19 +50,19 @@ class AskActivationCommand(override val payload: HasEmailPayload):
 
 }
 
-class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand<TokenPayload>( payload) {
+class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand<TokenPayload>(payload) {
     override fun validate(): ValidationResult {
-        return ValidationResult().check( payload.email.isNotEmpty(), "Email is empty")
+        return ValidationResult().check(payload.email.isNotEmpty(), "Email is empty")
     }
 
     override fun runUnit() {
         val email = payload.email
-        val user = queryUserByEmail(email).get() ?: throw NikotorValidationException("email $email does not exist")
+        val user = queryUserByEmail(email) ?: throw NikotorValidationException("email $email does not exist")
 
         ValidationResult()
-            .check(!user.activated,"User $email is already activated" )
-            .check(user.activationKey == payload.token,"Activation key ${payload.token} is wrong for user $email" )
-            .throwIfInvalid()
+                .check(!user.activated, "User $email is already activated")
+                .check(user.activationKey == payload.token, "Activation key ${payload.token} is wrong for user $email")
+                .throwIfInvalid()
 
     }
 
@@ -72,7 +72,7 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
 }
 
 
-class ChangePasswordCommand(override val payload: HashedPasswordPayload): ThrowableCommand<HashedPasswordPayload>(payload){
+class ChangePasswordCommand(override val payload: HashedPasswordPayload) : ThrowableCommand<HashedPasswordPayload>(payload) {
     override fun validate(): ValidationResult {
         return ValidationResult().check(
                 payload.password.isNotEmpty(), "Password for ${payload.email} is empty")
@@ -81,12 +81,12 @@ class ChangePasswordCommand(override val payload: HashedPasswordPayload): Throwa
     override fun runUnit() {
         val email = payload.email
         val password = payload.password
-        val oldPassword = queryHashedPassword(email).get()
+        val oldPassword = queryHashedPassword(email)
 
         ValidationResult()
-            .check(password!=oldPassword, "Password is the same")
-            .check(password.isNotEmpty(), "Password for ${payload.email} is empty")
-            .throwIfInvalid()
+                .check(password != oldPassword, "Password is the same")
+                .check(password.isNotEmpty(), "Password for ${payload.email} is empty")
+                .throwIfInvalid()
 
     }
 
@@ -97,17 +97,16 @@ class ChangePasswordCommand(override val payload: HashedPasswordPayload): Throwa
 }
 
 
-
-class AskPasswordResetCommand(override val payload: HasEmailPayload):
-    Command<HasEmail, TokenPayload> {
+class AskPasswordResetCommand(override val payload: HasEmailPayload) :
+        Command<HasEmail, TokenPayload> {
 
     override fun validate(): ValidationResult {
-        return ValidationResult().check( payload.email.isNotEmpty(), "Email is empty")
+        return ValidationResult().check(payload.email.isNotEmpty(), "Email is empty")
     }
 
-    override fun run():Await<TokenPayload>{
+    override suspend fun run(): TokenPayload {
         val token = UUID.randomUUID().toString();
-        return awaitNow(TokenPayload(payload.email, token))
+        return TokenPayload(payload.email, token)
     }
 
     override fun generateEvents(result: TokenPayload): Events {
@@ -117,21 +116,21 @@ class AskPasswordResetCommand(override val payload: HasEmailPayload):
 }
 
 
-class UpdateUserCommand(override val payload: User): Command<User, User> {
-    override fun run():Await<User> {
+class UpdateUserCommand(override val payload: User) : Command<User, User> {
+    override suspend fun run(): User {
         val email = payload.email
-        val originalUser = queryUserByEmail(email).get() ?:throw NotFoundException("User $email not found")
+        val originalUser = queryUserByEmail(email) ?: throw NotFoundException("User $email not found")
         // setting password into the DTO that will be the EventPayload
-        payload.password=originalUser.password
-        return awaitNow(payload)
+        payload.password = originalUser.password
+        return payload
 
     }
 
     override fun validate(): ValidationResult {
         // There should not be the password in it !
         return ValidationResult()
-            .check( payload.email.isNotEmpty(), "Email is empty")
-            .check( payload.password?.isEmpty() ?: true, "Password should be empty")
+                .check(payload.email.isNotEmpty(), "Email is empty")
+                .check(payload.password?.isEmpty() ?: true, "Password should be empty")
     }
 
     override fun generateEvents(result: User): Events {
@@ -142,10 +141,10 @@ class UpdateUserCommand(override val payload: User): Command<User, User> {
 }
 
 
-class RemoveUserCommand(override val payload: HasEmailPayload): ThrowableCommand<HasEmailPayload>(payload){
+class RemoveUserCommand(override val payload: HasEmailPayload) : ThrowableCommand<HasEmailPayload>(payload) {
     override fun runUnit() {
         val email = payload.email
-        queryUserByEmail(email).get() ?: throw NikotorValidationException("email $email does not exist")
+        queryUserByEmail(email) ?: throw NikotorValidationException("email $email does not exist")
     }
 
     override fun validate(): ValidationResult {

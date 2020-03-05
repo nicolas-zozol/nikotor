@@ -16,6 +16,13 @@ fun queryHashedPassword(email: String): String? {
     }
 }
 
+fun queryActivationTokenByEmail(email: String): String? {
+    return runBlocking {
+        dao.findActivationToken(email)
+    }
+}
+
+
 /**
  * Associated DAO
  */
@@ -23,6 +30,10 @@ interface UserDao {
 
     suspend fun findByEmail(email: String): User? {
         return usersDatabase.find(email)
+    }
+
+    suspend fun findActivationToken(email: String): String? {
+        return activationTokenDatabase.find(email)?.token
     }
 
 }

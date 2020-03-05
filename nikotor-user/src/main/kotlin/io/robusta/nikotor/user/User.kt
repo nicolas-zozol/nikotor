@@ -28,8 +28,10 @@ abstract class AbstractAuditingEntity : SimpleEntity(), Auditable, HasId {
  */
 class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
-    override val id:String
-        get(){return this.email}
+    override val id: String
+        get() {
+            return this.email
+        }
 
     var password: String? = null
     var firstName: String? = null
@@ -70,5 +72,12 @@ class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
 }
 
+class ActivationTokenRecord(val user: User) : HasId {
+    override val id: String
+        get() = user.email
+    val token: String = UUID.randomUUID().toString()
+
+
+}
 
 data class Authority(val name: String)

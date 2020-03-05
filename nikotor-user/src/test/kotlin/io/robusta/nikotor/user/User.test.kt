@@ -6,14 +6,13 @@ import io.robusta.nikotor.InMemoryEventStore
 import io.robusta.nikotor.core.NikotorEngine
 import io.robusta.nikotor.SimpleNikotorEngine
 import io.robusta.nikotor.user.UsersProjectionUpdater
-import io.robusta.nikotor.user.fixture.FakeEmailSender
-import io.robusta.nikotor.user.fixture.johnDoe
-import io.robusta.nikotor.user.fixture.registerJane
-import io.robusta.nikotor.user.fixture.registerJohn
+import io.robusta.nikotor.user.fixture.*
 import io.robusta.nikotor.user.usersDatabase
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.fail
+import kotlin.test.assertEquals
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -39,6 +38,21 @@ class UsersFeatureTest {
 
             assert(store.events.size == 2)
             assert(usersDatabase.find(johnDoe.email) == johnDoe)
+
+        }
+    }
+
+    @Test
+    fun testActivate() {
+
+        runBlocking {
+
+            val email= johnDoe.email
+            engine.process(registerJohn)
+            val token = queryActivationTokenByEmail(email) ?: fail("no token found")
+            engine.process(ActivateUserCommand(TokenPayload(email, token)))
+            val activatedJohn = queryUserByEmail(email) ?:fail("No john")
+            assertEquals(activatedJohn.activated, true)
 
         }
 

@@ -74,7 +74,25 @@ interface Command<out Payload, CommandResult> {
     // TODO: Command should return many events ?
 }
 
+/**
+ * Command that create an event that depends on the run() result
+ */
+abstract class RunnableCommand<out Payload, Result>(override val payload: Payload) :
+        Command<Payload, Result> {
 
+
+    override fun generateEvents(result: Result): Events {
+        return listOf(this.generateEvent(result))
+    }
+
+    abstract fun generateEvent(result:Result): Event<*>
+
+
+}
+
+/**
+ * Command that could fail before creating an event
+ */
 abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
         Command<Payload, Unit> {
 

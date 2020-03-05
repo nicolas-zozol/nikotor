@@ -36,8 +36,8 @@ class FakeEmailSender() : EmailSender {
  */
 val registerJohn = RegisterUserCommand(RegisterPayload(johnDoe, "abc"));
 val registerJane = RegisterUserCommand(RegisterPayload(janeDoe, "abc"));
-val askActivation = AskActivationCommand(HasEmailPayload(johnDoe.email))
-val activate = ActivateUserCommand(TokenPayload(johnDoe.email, token))
+//val askActivation = AskActivationCommand(HasEmailPayload(johnDoe.email))
+//val activate = ActivateUserCommand(TokenPayload(johnDoe.email, token))
 val changePassword = ChangePasswordCommand(HashedPasswordPayload(janeDoe.email, newPassword))
 val askPasswordReset = AskPasswordResetCommand(HasEmailPayload(janeDoe.email))
 val updateUser = UpdateUserCommand(getNewJohnDoe())

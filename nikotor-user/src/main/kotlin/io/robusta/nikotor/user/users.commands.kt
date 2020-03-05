@@ -5,7 +5,15 @@ import io.robusta.nikotor.core.*
 import java.util.*
 
 
-data class RegisterUserCommand(override val payload: RegisterPayload) : ThrowableCommand<RegisterPayload>(payload) {
+data class RegisterUserCommand(override val payload: RegisterPayload) : RunnableCommand<RegisterPayload, Token>(payload) {
+
+    override suspend fun run(): Token {
+        val email = payload.user.email
+        if (queryUserByEmail(email) != null) {
+            throw IllegalStateException("email $email is already used")
+        }
+        return createRandomToken()
+    }
 
 
     override fun validate(): ValidationResult {
@@ -15,23 +23,13 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Throwabl
                 .check(payload.password.isNotEmpty(), "password is not set")
     }
 
-    override fun runUnit() {
-        val email = payload.user.email
-        if (queryUserByEmail(email) != null) {
-            throw IllegalStateException("email $email is already used")
-        }
-
-        // if event succeed, then run command SendActivationMailCommand
-    }
-
-
-    override fun generateEvent(): Event<User> {
-        return UserRegisteredEvent(User(payload.user.email))
+    override fun generateEvent(result: Token): UserRegisteredEvent {
+        return UserRegisteredEvent(RegisterEventPayload(payload.user, result))
     }
 
 }
 
-
+/*
 class AskActivationCommand(override val payload: HasEmailPayload) :
         Command<HasEmail, TokenPayload> {
 
@@ -49,7 +47,7 @@ class AskActivationCommand(override val payload: HasEmailPayload) :
     }
 
 }
-
+*/
 class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand<TokenPayload>(payload) {
     override fun validate(): ValidationResult {
         return ValidationResult().check(payload.email.isNotEmpty(), "Email is empty")
@@ -59,9 +57,10 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
         val email = payload.email
         val user = queryUserByEmail(email) ?: throw NikotorValidationException("email $email does not exist")
 
+        val activationToken = queryActivationTokenByEmail(payload.email)
         ValidationResult()
                 .check(!user.activated, "User $email is already activated")
-                .check(user.activationKey == payload.token, "Activation key ${payload.token} is wrong for user $email")
+                .check(activationToken == payload.token, "Activation key ${payload.token} is wrong for user $email")
                 .throwIfInvalid()
 
     }

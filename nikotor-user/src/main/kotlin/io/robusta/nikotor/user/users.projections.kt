@@ -7,6 +7,9 @@ import java.lang.IllegalStateException
 import java.util.concurrent.CompletableFuture
 
 val usersDatabase = DataSet<User>()
+val accountSet = DataSet<Account>()
+val visitSet = DataSet<Visit>()
+
 val activationTokenDatabase = DataSet<ActivationTokenRecord>()
 
 

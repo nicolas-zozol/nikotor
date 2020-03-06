@@ -29,6 +29,23 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Runnable
 
 }
 
+data class LoginCommand(override val payload: WithPasswordPayload) : RunnableCommand<WithPasswordPayload, Boolean>(payload) {
+    override suspend fun run(): Boolean {
+        return privateQueryCheckPassword(payload.email, hashPassword(payload.password))
+    }
+
+    override fun validate(): ValidationResult {
+        return ValidationResult()
+                .check(payload.email.isNotEmpty(), "Sent email is not valid")
+                .check(payload.password.isNotEmpty(), "Sent password is not valid")
+    }
+
+    override fun generateEvent(result: Boolean): Event<*> {
+        return UserLoggedEvent(payload)
+    }
+
+}
+
 /*
 class AskActivationCommand(override val payload: HasEmailPayload) :
         Command<HasEmail, TokenPayload> {
@@ -71,25 +88,18 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
 }
 
 
-class ChangePasswordCommand(override val payload: HashedPasswordPayload) : ThrowableCommand<HashedPasswordPayload>(payload) {
+class ChangePasswordCommand(override val payload: HashedPasswordPayload) : RunnableCommand<HashedPasswordPayload, String>(payload) {
+
     override fun validate(): ValidationResult {
         return ValidationResult().check(
                 payload.password.isNotEmpty(), "Password for ${payload.email} is empty")
     }
 
-    override fun runUnit() {
-        val email = payload.email
-        val password = payload.password
-        val oldPassword = queryHashedPassword(email)
-
-        ValidationResult()
-                .check(password != oldPassword, "Password is the same")
-                .check(password.isNotEmpty(), "Password for ${payload.email} is empty")
-                .throwIfInvalid()
-
+    override suspend fun run(): String {
+        return (hashPassword(payload.password))
     }
 
-    override fun generateEvent(): Event<*> {
+    override fun generateEvent(result: String): Event<*> {
         return PasswordUpdatedEvent(payload)
     }
 
@@ -120,7 +130,6 @@ class UpdateUserCommand(override val payload: User) : Command<User, User> {
         val email = payload.email
         val originalUser = queryUserByEmail(email) ?: throw NotFoundException("User $email not found")
         // setting password into the DTO that will be the EventPayload
-        payload.password = originalUser.password
         return payload
 
     }
@@ -129,11 +138,9 @@ class UpdateUserCommand(override val payload: User) : Command<User, User> {
         // There should not be the password in it !
         return ValidationResult()
                 .check(payload.email.isNotEmpty(), "Email is empty")
-                .check(payload.password?.isEmpty() ?: true, "Password should be empty")
     }
 
     override fun generateEvents(result: User): Events {
-        check(!result.password.isNullOrEmpty())
         return listOf(UserUpdatedEvent(result))
     }
 

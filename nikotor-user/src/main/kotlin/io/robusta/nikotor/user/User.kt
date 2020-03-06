@@ -4,9 +4,24 @@ import io.robusta.nikotor.data.HasId
 import io.robusta.nikotor.data.SimpleEntity
 import java.time.Instant
 import java.util.*
+import org.mindrot.jbcrypt.BCrypt
+
+
 
 interface HasEmail {
     val email: String
+}
+
+interface HasPassword {
+    val password: String
+}
+
+interface HasToken {
+    val token: String
+}
+
+interface HasUser {
+    val user: User
 }
 
 // Don't use this. Use concept of Decorator, ie Modification
@@ -33,7 +48,6 @@ class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
             return this.email
         }
 
-    var password: String? = null
     var firstName: String? = null
 
     var lastName: String? = null
@@ -77,7 +91,20 @@ class ActivationTokenRecord(val user: User) : HasId {
         get() = user.email
     val token: String = UUID.randomUUID().toString()
 
+}
 
+class Account(override val email: String, val hashedPassword: String) : HasEmail, HasId {
+    override val id: String
+        get() = email
+}
+
+class Visit(override val email: String, val date: Date) : HasEmail, HasId {
+    override val id = createRandomId()
 }
 
 data class Authority(val name: String)
+
+
+fun hashPassword(password: String): String {
+    return BCrypt.hashpw(password, BCrypt.gensalt())
+}

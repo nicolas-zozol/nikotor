@@ -10,11 +10,12 @@ fun queryUserByEmail(email: String): User? {
     }
 }
 
-fun queryHashedPassword(email: String): String? {
+fun privateQueryCheckPassword(email: String, hashedPassword: String):Boolean {
     return runBlocking {
-        dao.findByEmail(email)?.password
+        dao.checkPassword(email, hashedPassword)
     }
 }
+
 
 fun queryActivationTokenByEmail(email: String): String? {
     return runBlocking {
@@ -34,6 +35,10 @@ interface UserDao {
 
     suspend fun findActivationToken(email: String): String? {
         return activationTokenDatabase.find(email)?.token
+    }
+
+    suspend fun checkPassword(email: String, hashedPassword: String): Boolean {
+        return accountSet.find(email)?.hashedPassword == hashedPassword
     }
 
 }

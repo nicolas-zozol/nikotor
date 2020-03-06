@@ -5,9 +5,7 @@ import kotlinx.coroutines.*
 import io.robusta.nikotor.InMemoryEventStore
 import io.robusta.nikotor.core.NikotorEngine
 import io.robusta.nikotor.SimpleNikotorEngine
-import io.robusta.nikotor.user.UsersProjectionUpdater
 import io.robusta.nikotor.user.fixture.*
-import io.robusta.nikotor.user.usersDatabase
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
@@ -55,7 +53,15 @@ class UsersFeatureTest {
             assertEquals(activatedJohn.activated, true)
 
         }
+    }
 
+    @Test
+    fun testChangePassword(){
+        runBlocking {
+            engine.process(registerJane)
+            engine.process(changeJanePassword)
+
+        }
 
     }
 

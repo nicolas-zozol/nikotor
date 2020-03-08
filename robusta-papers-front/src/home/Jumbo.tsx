@@ -11,16 +11,6 @@ const PaperWrapper = styled.div`
   overflow: hidden;
 `;
 
-const Overlay = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 50px;
-  color: black;
-  background-color: whitesmoke;
-  z-index: 10;
-`;
-
 export function Jumbo() {
   return (
     <header>

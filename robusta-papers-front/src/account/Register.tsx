@@ -2,7 +2,6 @@ import React, {FormEvent, useReducer} from 'react';
 import {Action} from "../forms/Action";
 import {registerNewUser} from "../api/login-api";
 
-
 type FullRegisterForm = {
     email: string;
     password: string;

@@ -11,8 +11,8 @@ import {BrowserRouter as Router} from "react-router-dom";
 
 function App() {
 
-    const [loggedUser, setLoggedUser]=useState<OptionalUser>(undefined)
-
+    const [loggedUser, setLoggedUser] = useState<OptionalUser>(undefined)
+    const [justRegistered, setJustRegistered] = useState(false);
 
     return (
         <>
@@ -20,20 +20,20 @@ function App() {
 
                 <Router>
                     <div>
-                        <TopBar />
+                        <TopBar/>
 
                         {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
                         <Switch>
                             <Route path="/login">
-                                <Login  updateLoggedUser={setLoggedUser} />
+                                <Login updateLoggedUser={setLoggedUser}/>
                             </Route>
                             <Route path="/register">
-                                <Register />
+                                <Register onRegister={() => setJustRegistered(true)}/>
                             </Route>
                             <Route path="/">
-                                <Jumbo />
-                                <Presentation />
+                                <Jumbo/>
+                                {justRegistered ? "Thank you, check you mail" : <Presentation/>}
                             </Route>
                         </Switch>
                     </div>

@@ -43,9 +43,6 @@ export function Login({updateLoggedUser}: LoginProps) {
                     placeholder="Enter email"
                     onChange={event => dispatch({type: "email", value: event.target.value})}
                 />
-                <small id="emailHelp" className="form-text text-muted">
-                    We'll never share your email with anyone else.
-                </small>
             </div>
             <div className="form-group">
                 <label htmlFor="input-password">Password</label>
@@ -69,7 +66,7 @@ export function Login({updateLoggedUser}: LoginProps) {
                 </label>
             </div>
             <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
-                Submit
+                Login
             </button>
         </form>
     );

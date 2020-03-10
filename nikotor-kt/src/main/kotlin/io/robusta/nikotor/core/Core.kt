@@ -155,7 +155,7 @@ abstract class SimpleEvent<P>(override val payload: P) : Event<P> {
     }
 }
 
-class PayloadId(val id: String)
+
 
 
 interface ProjectionUpdater {

@@ -1,6 +1,9 @@
 package io.robusta.nikotor.user
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 
 val dao = UserDatasetDao()
 
@@ -10,7 +13,23 @@ fun queryUserByEmail(email: String): User? {
     }
 }
 
-fun privateQueryCheckPassword(email: String, hashedPassword: String):Boolean {
+fun queryLoginAttempt(email: String, hashAttempt: String): User? {
+    val attempt = loginAttempts.find(hashAttempt) ?: return null
+
+    if (currentHour() - attempt.hour > 1) {
+        // TODO: log time problem
+        throw IllegalStateException("Delay has expired")
+    }
+
+    if (email != attempt.email) {
+        throw IllegalArgumentException("Email for the attempt is different from the attempts saved with the same hash")
+    }
+
+    return queryUserByEmail(email)
+}
+
+
+fun privateQueryCheckPassword(email: String, hashedPassword: String): Boolean {
     return runBlocking {
         dao.checkPassword(email, hashedPassword)
     }

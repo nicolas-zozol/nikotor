@@ -29,6 +29,9 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Runnable
 
 }
 
+/**
+ *
+ */
 data class LoginCommand(override val payload: WithPasswordPayload) : RunnableCommand<WithPasswordPayload, Boolean>(payload) {
     override suspend fun run(): Boolean {
         return privateQueryCheckPassword(payload.email, hashPassword(payload.password))
@@ -41,7 +44,11 @@ data class LoginCommand(override val payload: WithPasswordPayload) : RunnableCom
     }
 
     override fun generateEvent(result: Boolean): Event<*> {
-        return UserLoggedEvent(payload)
+        val input = payload.email + payload.password;
+        val eventPayload = HashUtils.sha512(input)
+        return if (result)
+            LoginEvent(LoginHashPayload(payload.email, eventPayload))
+        else FailedLoginEvent(HasEmailPayload(payload.email))
     }
 
 }

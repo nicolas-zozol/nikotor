@@ -48,21 +48,27 @@ class UsersFeatureTest {
 
         runBlocking {
 
-            val email= johnDoe.email
+            val email = johnDoe.email
             engine.process(registerJohn)
             val token = queryActivationTokenByEmail(email) ?: fail("no token found")
             engine.process(ActivateUserCommand(TokenPayload(email, token)))
-            val activatedJohn = queryUserByEmail(email) ?:fail("No john")
+            val activatedJohn = queryUserByEmail(email) ?: fail("No john")
             assertEquals(activatedJohn.activated, true)
 
         }
     }
 
     @Test
-    fun testChangePassword(){
+    fun testChangePassword() {
         runBlocking {
             engine.process(registerJane)
+            val newPassword = "ABCD";
+            val changeJanePassword = ChangePasswordCommand(HashedPasswordPayload(janeDoe.email, newPassword))
             engine.process(changeJanePassword)
+
+            // cheking that login is now ok with new password
+            LoginCommand(LoginHashPayload())
+
 
         }
 

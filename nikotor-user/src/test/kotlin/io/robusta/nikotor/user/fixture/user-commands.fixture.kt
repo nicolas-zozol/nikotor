@@ -2,12 +2,6 @@ package io.robusta.nikotor.user.fixture
 
 import io.robusta.nikotor.user.*
 
-/**
- * Fixtures
- */
-val token = "1234"
-val newPassword = "abcd"
-
 
 val johnDoe = User("john.doe@example.com")
 val janeDoe = User("jane.doe@example.com")
@@ -34,7 +28,7 @@ val registerJohn = RegisterUserCommand(RegisterPayload(johnDoe, "abc"));
 val registerJane = RegisterUserCommand(RegisterPayload(janeDoe, "abc"));
 //val askActivation = AskActivationCommand(HasEmailPayload(johnDoe.email))
 //val activate = ActivateUserCommand(TokenPayload(johnDoe.email, token))
-val changeJanePassword = ChangePasswordCommand(HashedPasswordPayload(janeDoe.email, newPassword))
+
 val askJanePasswordReset = AskPasswordResetCommand(HasEmailPayload(janeDoe.email))
 val updateJohn = UpdateUserCommand(getNewJohnDoe())
 val removeJohn = RemoveUserCommand(HasEmailPayload(johnDoe.email))

@@ -25,6 +25,9 @@ class UsersFeatureTest {
         store = InMemoryEventStore()
         engine = SimpleNikotorEngine(store, listOf(updater))
         usersDatabase.clear()
+        activationTokenDatabase.clear()
+        accountSet.clear()
+        visitSet.clear()
     }
 
     @Test

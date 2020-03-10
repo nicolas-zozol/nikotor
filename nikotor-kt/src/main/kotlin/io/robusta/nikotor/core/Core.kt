@@ -1,6 +1,8 @@
 package io.robusta.nikotor.core
 
 import io.robusta.nikotor.NikotorValidationException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -172,6 +174,15 @@ interface NikotorEngine {
     suspend fun <Payload, CommandResult> process(
             command: Command<Payload, CommandResult>
     ): PersistedEvent<*, *>
+
+    /**
+     * Used for Java interaction
+     */
+    fun <Payload, CommandResult>processAsync(command: Command<Payload, CommandResult>)
+            : CompletableFuture<PersistedEvent<*, *>>{
+        return     GlobalScope.future { process(command) }
+
+    }
 
     fun subscribe(newSubscriber: NikotorSubscriber): Void
     fun unsubscribe(oldSubscriber: NikotorSubscriber): Void

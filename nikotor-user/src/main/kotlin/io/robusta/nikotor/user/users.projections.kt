@@ -28,11 +28,11 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
 
         when (event) {
             is UserRegisteredEvent -> {
-                usersDatabase.add(event.payload.user)
-                activationTokenDatabase.add(ActivationTokenRecord(event.payload.user))
-                //TODO: add account with hashed password
+                val user = event.payload.user
+                usersDatabase.add(user)
+                activationTokenDatabase.add(ActivationTokenRecord(user))
+                accountSet.add(Account(user.email, event.payload.hashedPassword))
                 // in subscriber: create AskActivationCommand
-                //potAuFeuDatabase.add(payload)
             }
             is UserActivatedEvent -> {
                 val activatedUser = queryUserByEmail(event.payload.email)

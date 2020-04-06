@@ -3,6 +3,7 @@ package io.robusta.nikotor.user
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
+import org.mindrot.jbcrypt.BCrypt
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.util.*
@@ -17,9 +18,9 @@ fun queryUserByEmail(email: String): User? {
 }
 
 
-fun privateQueryCheckPassword(email: String, hashedPassword: String): Boolean {
+fun privateQueryCheckPassword(email: String, clearPassword: ClearPassword): Boolean {
     return runBlocking {
-        dao.checkPassword(email, hashedPassword)
+        dao.checkPassword(email, clearPassword)
     }
 }
 
@@ -44,8 +45,10 @@ interface UserDao {
         return activationTokenDatabase.find(email)?.token
     }
 
-    suspend fun checkPassword(email: String, hashedPassword: String): Boolean {
-        return accountSet.find(email)?.hashedPassword == hashedPassword
+    suspend fun checkPassword(email: String, clearPassword: ClearPassword): Boolean {
+
+        val account = accountSet.find(email) ?: return false
+        return BCrypt.checkpw(clearPassword, account.hashedPassword)
     }
 
     suspend fun queryLoginAttempt(email: String, hashAttempt: String): User? {
@@ -81,9 +84,9 @@ class UserDaoAsync(private val dao: UserDao) {
         }
     }
 
-    fun checkPassword(email: String, hashedPassword: String): CompletableFuture<Boolean> {
+    fun checkPassword(email: String, clearPassword: ClearPassword): CompletableFuture<Boolean> {
         return GlobalScope.future {
-            dao.checkPassword(email, hashedPassword)
+            dao.checkPassword(email, clearPassword)
         }
     }
 

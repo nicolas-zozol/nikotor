@@ -93,7 +93,7 @@ class ActivationTokenRecord(val user: User) : HasId {
 
 }
 
-class Account(override val email: String, val hashedPassword: String) : HasEmail, HasId {
+class Account(override val email: String, val hashedPassword: HashedPassword) : HasEmail, HasId {
     override val id: String
         get() = email
 }
@@ -108,7 +108,7 @@ data class Authority(val name: String)
 
 
 fun hashPassword(password: String): String {
-    return BCrypt.hashpw(password, BCrypt.gensalt())
+    return BCrypt.hashpw(password, BCrypt.gensalt(12))
 }
 
 object HashUtils {

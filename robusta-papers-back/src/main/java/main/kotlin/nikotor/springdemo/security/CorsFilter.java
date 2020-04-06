@@ -17,7 +17,6 @@ public class CorsFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
             throws IOException, ServletException {
 
-        System.out.println(">>> Entering Cors filter for "+((HttpServletRequest)servletRequest).getRequestURL());
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         // Authorize (allow) all domains to consume the content

@@ -10,6 +10,8 @@ import java.util.*
 class PayloadId(override val id: String): HasId
 
 typealias Token = String
+typealias HashedPassword = String
+typealias ClearPassword = String
 typealias UserId = PayloadId
 
 fun createRandomId(): Token {
@@ -21,7 +23,7 @@ fun createRandomToken(): Token {
 }
 
 data class RegisterPayload(val user: User, val password: String)
-data class RegisterEventPayload(val user: User, val token: Token)
+data class RegisterEventPayload(val user: User, val hashedPassword:HashedPassword, val token: Token)
 data class WithPasswordPayload(override val password: String, override val email: String,
                                override val id: String) : HasPassword, HasEmail, HasId
 data class UserUpdatedPayload(val newUser: User, val previous: User, val by: UserId, val date: Date)

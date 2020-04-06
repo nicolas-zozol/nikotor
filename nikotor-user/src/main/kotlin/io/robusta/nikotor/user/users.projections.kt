@@ -29,10 +29,11 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
         when (event) {
             is UserRegisteredEvent -> {
                 val user = event.payload.user
+                /* Should be transactional */
                 usersDatabase.add(user)
                 activationTokenDatabase.add(ActivationTokenRecord(user))
                 accountSet.add(Account(user.email, event.payload.hashedPassword))
-                // in subscriber: create AskActivationCommand
+                /* End of transaction */
             }
             is UserActivatedEvent -> {
                 val activatedUser = queryUserByEmail(event.payload.email)

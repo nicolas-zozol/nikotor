@@ -1,6 +1,5 @@
 package io.robusta.nikotor.user
 
-import io.robusta.nikotor.data.DataSet
 import io.robusta.nikotor.data.HasId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime

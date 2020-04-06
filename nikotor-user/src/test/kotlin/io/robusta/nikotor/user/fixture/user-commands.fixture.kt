@@ -33,4 +33,6 @@ val askJanePasswordReset = AskPasswordResetCommand(HasEmailPayload(janeDoe.email
 val updateJohn = UpdateUserCommand(getNewJohnDoe())
 val removeJohn = RemoveUserCommand(HasEmailPayload(johnDoe.email))
 
+val loginJohn = LoginCommand(LoginAttemptPayload(johnDoe.email, "abc", createRandomToken()));
+
 

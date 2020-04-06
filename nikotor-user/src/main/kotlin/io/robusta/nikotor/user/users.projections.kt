@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture
 val usersDatabase = DataSet<User>()
 val accountSet = DataSet<Account>()
 val visitSet = DataSet<Visit>()
+val loginAttempts = DataSet<LoginAttempt>()
 
 val activationTokenDatabase = DataSet<ActivationTokenRecord>()
 
@@ -29,6 +30,7 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
             is UserRegisteredEvent -> {
                 usersDatabase.add(event.payload.user)
                 activationTokenDatabase.add(ActivationTokenRecord(event.payload.user))
+                //TODO: add account with hashed password
                 // in subscriber: create AskActivationCommand
                 //potAuFeuDatabase.add(payload)
             }
@@ -36,6 +38,10 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
                 val activatedUser = queryUserByEmail(event.payload.email)
                         ?: throw IllegalStateException("User ${event.payload.email} disappeared")
                 activatedUser.activated = true
+            }
+
+            is LoginEvent ->{
+                loginAttempts.add(LoginAttempt(event.payload.email, event.payload.token))
             }
         }
     }

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.robusta.nikotor.InMemoryEventStore;
 import io.robusta.nikotor.SimpleNikotorEngine;
 import io.robusta.nikotor.core.NikotorEngine;
@@ -29,15 +31,19 @@ import java.util.List;
 @SpringBootApplication
 public class SpringDemoApplication {
 
+    static public final String CURRENT_API = "/api/v1";
     // Could be injected properly as a bean...
     static private InMemoryEventStore store;
     static private NikotorEngine engine;
     static private UsersProjectionUpdater updater = new UsersProjectionUpdater(
             new UserBundle(new FakeEmailSender()));
 
+    public SpringDemoApplication() {
+        createEngine();
+    }
+
     public static void main(String[] args) {
 
-        createEngine();
         SpringApplication.run(SpringDemoApplication.class, args);
     }
 
@@ -72,7 +78,7 @@ public class SpringDemoApplication {
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
         MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
         ObjectMapper objectMapper = new Jackson2ObjectMapperBuilder()
-                .modules( new AfterburnerModule(), new KotlinModule())
+                .modules( new AfterburnerModule(), new KotlinModule(), new JavaTimeModule(), new ParameterNamesModule())
                 .build()
                 .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY)
                 .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY)

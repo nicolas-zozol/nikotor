@@ -11,6 +11,7 @@ import org.junit.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,7 +68,9 @@ class UsersFeatureTest {
             engine.process(changeJanePassword)
 
             // cheking that login is now ok with new password
-            LoginCommand(LoginHashPayload())
+            val loginCommand = LoginCommand(LoginAttemptPayload(janeDoe.email, newPassword))
+            val result = engine.process(loginCommand)
+            assertTrue(result.sequenceId > 1)
 
 
         }

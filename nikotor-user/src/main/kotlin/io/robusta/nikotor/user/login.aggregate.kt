@@ -7,17 +7,16 @@ import java.time.ZonedDateTime
 
 
 
-data class LoginAttemptPayload(val email: String, val hashAttempt: String)
 
-data class LoginAttempt(val email: String, val hashAttempt: String) : HasId {
+data class LoginAttempt(val email: String, val token: String) : HasId {
     override val id: String
-        get() = hashAttempt
+        get() = token
     val hour = currentHour()
 
 
 }
 
-val loginAttempts = DataSet<LoginAttempt>()
+
 
 // TODO: count minutes since 2000. Create a config entry in the bundle. Calculate a time difference.
 // Not done now, because not sure at all if this method will stands.

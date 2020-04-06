@@ -31,13 +31,17 @@ data class HasEmailPayload(override val email: String) : HasEmail {}
  * Hashed password !!!! it's up to the rest controller to hash it correctly
  */
 data class HashedPasswordPayload(override val email: String, val password: String) : HasEmail
-data class LoginHashPayload(override val email: String, val hash: String) : HasEmail
+
+/**
+ * In an easy version, the token is just a uuid. It could be a json token with hashing data
+ */
+data class LoginAttemptPayload(override val email: String, val password: String, var token: String="") : HasEmail
 
 class UserRegisteredEvent(payload: RegisterEventPayload) : SimpleEvent<RegisterEventPayload>(payload)
 class UserActivatedEvent(payload: TokenPayload) : SimpleEvent<TokenPayload>(payload)
-class LoginEvent(payload: LoginHashPayload) : SimpleEvent<LoginHashPayload>(payload)
+class LoginEvent(payload: TokenPayload) : SimpleEvent<TokenPayload>(payload)
 class FailedLoginEvent(payload: HasEmail) : SimpleEvent<HasEmail>(payload)
-class CompletedLoggedEvent(payload: HasEmail) : SimpleEvent<HasEmail>(payload)
+class CompletedLoginLoggedEvent(payload: HasEmail) : SimpleEvent<HasEmail>(payload)
 class PasswordUpdatedEvent(payload: HashedPasswordPayload) : SimpleEvent<HashedPasswordPayload>(payload)
 class AskPasswordResetEvent(payload: HasEmailPayload) : SimpleEvent<HasEmailPayload>(payload)
 class UserUpdatedEvent(payload: User) : SimpleEvent<User>(payload)

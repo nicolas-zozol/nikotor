@@ -22,7 +22,7 @@ class SimpleNikotorEngine(
             result = command.run()
             val events = command.generateEvents(result)
             if(events.size>1){
-                throw IllegalStateException("Multiple events not yet implemented iun SimpleEngine")
+                throw IllegalStateException("Multiple events not yet implemented in SimpleEngine")
             }
             val event = events[0]
             // todo: problem with a catch: check if ok with coroutines now

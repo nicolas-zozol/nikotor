@@ -12,7 +12,7 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Runnable
         if (queryUserByEmail(email) != null) {
             throw IllegalStateException("email $email is already used")
         }
-        return Pair(hashPassword(payload.password), createRandomToken())
+        return Pair(Hasher.hashPassword(payload.password), createRandomToken())
     }
 
 
@@ -94,19 +94,19 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
 }
 
 
-class ChangePasswordCommand(override val payload: HashedPasswordPayload) : RunnableCommand<HashedPasswordPayload, String>(payload) {
+class ChangePasswordCommand(override val payload: EmailPasswordPayload) : RunnableCommand<EmailPasswordPayload, HashedPassword>(payload) {
 
     override fun validate(): ValidationResult {
         return ValidationResult().check(
                 payload.password.isNotEmpty(), "Password for ${payload.email} is empty")
     }
 
-    override suspend fun run(): String {
-        return (hashPassword(payload.password))
+    override suspend fun run(): HashedPassword {
+        return Hasher.hashPassword(payload.password)
     }
 
-    override fun generateEvent(result: String): Event<*> {
-        return PasswordUpdatedEvent(payload)
+    override fun generateEvent(result: HashedPassword): PasswordUpdatedEvent {
+        return PasswordUpdatedEvent(EmailHashedPasswordPayload(payload.email, result))
     }
 
 }
@@ -129,7 +129,6 @@ class AskPasswordResetCommand(override val payload: HasEmailPayload) :
     }
 
 }
-
 
 class UpdateUserCommand(override val payload: User) : Command<User, User> {
     override suspend fun run(): User {

@@ -30,6 +30,13 @@ class DataSet<Entity> where Entity : HasId {
         this.map[element.id] = element
     }
 
+    fun update(element:Entity){
+        if (this.map[element.id] == null) {
+            throw IllegalStateException("Element with id " + element.id + " is NOT already existing")
+        }
+        this.map[element.id] = element
+    }
+
     fun remove(element: Entity) {
         this.map.remove(element.id)
     }

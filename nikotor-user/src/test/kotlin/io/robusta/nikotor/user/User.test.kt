@@ -35,11 +35,11 @@ class UsersFeatureTest {
     fun testRegister() {
         runBlocking {
 
-            engine.process(registerJohn)
-            engine.process(registerJane)
+            engine.process(registerJohn())
+            engine.process(registerJane())
 
             assert(store.events.size == 2)
-            assert(usersDatabase.find(johnDoe.email) == johnDoe)
+            assert(usersDatabase.find(johnDoeEmail) == getNewJohnDoe())
 
         }
     }
@@ -49,8 +49,8 @@ class UsersFeatureTest {
 
         runBlocking {
 
-            val email = johnDoe.email
-            engine.process(registerJohn)
+            val email = johnDoeEmail
+            engine.process(registerJohn())
             val token = queryActivationTokenByEmail(email) ?: fail("no token found")
             engine.process(ActivateUserCommand(TokenPayload(email, token)))
             val activatedJohn = queryUserByEmail(email) ?: fail("No john")
@@ -62,15 +62,16 @@ class UsersFeatureTest {
     @Test
     fun testChangePassword() {
         runBlocking {
-            engine.process(registerJane)
+            engine.process(registerJane())
             val newPassword = "ABCD";
-            val changeJanePassword = ChangePasswordCommand(HashedPasswordPayload(janeDoe.email, newPassword))
+            val changeJanePassword = ChangePasswordCommand(EmailPasswordPayload(janeDoeEmail, newPassword))
             engine.process(changeJanePassword)
 
             // cheking that login is now ok with new password
-            val loginCommand = LoginCommand(LoginAttemptPayload(janeDoe.email, newPassword))
+            val loginCommand = LoginCommand(LoginAttemptPayload(janeDoeEmail, newPassword))
             val result = engine.process(loginCommand)
             assertTrue(result.sequenceId > 1)
+            assertTrue(privateQueryCheckPassword(janeDoeEmail, "ABCD"))
 
 
         }
@@ -81,13 +82,13 @@ class UsersFeatureTest {
     @Test
     fun testRegisterThenActivateThenLogin(){
         runBlocking {
-            val email = johnDoe.email
-            engine.process(registerJohn)
+            val email = johnDoeEmail
+            engine.process(registerJohn())
             val token = queryActivationTokenByEmail(email) ?: fail("no token found")
             engine.process(ActivateUserCommand(TokenPayload(email, token)))
 
-            engine.process(loginJohn)
-            assertTrue(privateQueryCheckPassword(email, "abc"))
+            engine.process(loginJohn())
+            assertTrue(privateQueryCheckPassword(email, johnDoePassword))
 
         }
     }

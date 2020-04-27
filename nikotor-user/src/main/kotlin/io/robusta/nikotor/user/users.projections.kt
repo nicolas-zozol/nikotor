@@ -41,6 +41,10 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
                 activatedUser.activated = true
             }
 
+            is PasswordUpdatedEvent ->{
+                accountSet.update(Account(event.payload.email, event.payload.hashedPassword))
+            }
+
             is LoginEvent ->{
                 loginAttempts.add(LoginAttempt(event.payload.email, event.payload.token))
             }

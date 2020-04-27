@@ -3,12 +3,23 @@ package io.robusta.nikotor.user.fixture
 import io.robusta.nikotor.user.*
 
 
-val johnDoe = User("john.doe@example.com")
-val janeDoe = User("jane.doe@example.com")
+//val johnDoe = User()
+//val janeDoe = User("jane.doe@example.com")
 
-fun getNewJohnDoe(): User {
-    val newJohnDoe = User(johnDoe.email)
+internal const val johnDoeEmail = "john.doe@example.com";
+internal const val janeDoeEmail = "jane.doe@example.com";
+internal const val johnDoePassword = "abc";
+
+internal fun getNewJohnDoe(): User {
+    val newJohnDoe = User(johnDoeEmail)
     newJohnDoe.firstName = "John"
+    newJohnDoe.lastName = "Doe"
+    return newJohnDoe
+}
+
+internal fun getNewJaneDoe(): User {
+    val newJohnDoe = User(janeDoeEmail)
+    newJohnDoe.firstName = "Jane"
     newJohnDoe.lastName = "Doe"
     return newJohnDoe
 }
@@ -24,15 +35,16 @@ class FakeEmailSender() : EmailSender {
 /**
  * Commands using fixtures
  */
-val registerJohn = RegisterUserCommand(RegisterPayload(johnDoe, "abc"));
-val registerJane = RegisterUserCommand(RegisterPayload(janeDoe, "abc"));
+internal fun registerJohn() = RegisterUserCommand(RegisterPayload(getNewJohnDoe(), johnDoePassword));
+
+internal fun registerJane() = RegisterUserCommand(RegisterPayload(getNewJaneDoe(), johnDoePassword));
 //val askActivation = AskActivationCommand(HasEmailPayload(johnDoe.email))
 //val activate = ActivateUserCommand(TokenPayload(johnDoe.email, token))
 
-val askJanePasswordReset = AskPasswordResetCommand(HasEmailPayload(janeDoe.email))
-val updateJohn = UpdateUserCommand(getNewJohnDoe())
-val removeJohn = RemoveUserCommand(HasEmailPayload(johnDoe.email))
+internal fun askJanePasswordReset() = AskPasswordResetCommand(HasEmailPayload(janeDoeEmail))
+internal fun updateJohn() = UpdateUserCommand(getNewJohnDoe())
+internal fun removeJohn() = RemoveUserCommand(HasEmailPayload(johnDoeEmail))
 
-val loginJohn = LoginCommand(LoginAttemptPayload(johnDoe.email, "abc", createRandomToken()));
+internal fun loginJohn() = LoginCommand(LoginAttemptPayload(johnDoeEmail, johnDoePassword, createRandomToken()));
 
 

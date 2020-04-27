@@ -41,7 +41,7 @@ abstract class AbstractAuditingEntity : SimpleEntity(), Auditable, HasId {
 /**
  * User email is both database key and login
  */
-class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
+open class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
     override val id: String
         get() {
@@ -83,66 +83,23 @@ class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
         return email
     }
 
-
 }
 
-class ActivationTokenRecord(val user: User) : HasId {
+class ActivationTokenRecord(override val user: User) : HasId, HasUser {
     override val id: String
         get() = user.email
     val token: String = UUID.randomUUID().toString()
 
 }
 
-class Account(override val email: String, val hashedPassword: HashedPassword) : HasEmail, HasId {
+internal class Account(override val user: User, val hashedPassword: HashedPassword) : HasUser, HasId {
     override val id: String
-        get() = email
+        get() = user.email
 }
 
-class Visit(override val email: String, val date: Date) : HasEmail, HasId {
+internal class Visit(override val user: User, val date: Date) : HasUser, HasId {
     override val id = createRandomId()
 }
 
 data class Authority(val name: String)
 
-
-
-
-fun hashPassword(password: String): String {
-    return BCrypt.hashpw(password, BCrypt.gensalt(12))
-}
-
-object HashUtils {
-    fun sha512(input: String) = hashString("SHA-512", input)
-
-    fun sha256(input: String) = hashString("SHA-256", input)
-
-    fun sha1(input: String) = hashString("SHA-1", input)
-
-    /**
-     * Supported algorithms on Android:
-     *
-     * Algorithm	Supported API Levels
-     * MD5          1+
-     * SHA-1	    1+
-     * SHA-224	    1-8,22+
-     * SHA-256	    1+
-     * SHA-384	    1+
-     * SHA-512	    1+
-     */
-    @Suppress("LocalVariableName")
-    private fun hashString(type: String, input: String): String {
-        val HEX_CHARS = "0123456789ABCDEF"
-        val bytes = MessageDigest
-                .getInstance(type)
-                .digest(input.toByteArray())
-        val result = StringBuilder(bytes.size * 2)
-
-        bytes.forEach {
-            val i = it.toInt()
-            result.append(HEX_CHARS[i shr 4 and 0x0f])
-            result.append(HEX_CHARS[i and 0x0f])
-        }
-
-        return result.toString()
-    }
-}

@@ -9,7 +9,11 @@ import java.lang.IllegalStateException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
+object UserQuerySet{}
+
 val dao = UserDatasetDao()
+
+
 
 fun queryUserByEmail(email: String): User? {
     return runBlocking {

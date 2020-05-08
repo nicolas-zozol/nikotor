@@ -92,12 +92,12 @@ class ActivationTokenRecord(override val user: User) : HasId, HasUser {
 
 }
 
-internal class Account(override val user: User, val hashedPassword: HashedPassword) : HasUser, HasId {
+class Account(override val user: User, val hashedPassword: HashedPassword) : HasUser, HasId {
     override val id: String
         get() = user.email
 }
 
-internal class Visit(override val user: User, val date: Date) : HasUser, HasId {
+class Visit(override val user: User, val date: Date) : HasUser, HasId {
     override val id = createRandomId()
 }
 

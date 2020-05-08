@@ -32,7 +32,7 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
                 /* Should be transactional */
                 usersDatabase.add(user)
                 activationTokenDatabase.add(ActivationTokenRecord(user))
-                accountSet.add(Account(user.email, event.payload.hashedPassword))
+                accountSet.add(Account(user, event.payload.hashedPassword))
                 /* End of transaction */
             }
             is UserActivatedEvent -> {
@@ -42,7 +42,7 @@ class UsersProjectionUpdater(userBundle: UserBundle) : ProjectionUpdater {
             }
 
             is PasswordUpdatedEvent ->{
-                accountSet.update(Account(event.payload.email, event.payload.hashedPassword))
+                accountSet.update(Account(User(event.payload.email), event.payload.hashedPassword))
             }
 
             is LoginEvent ->{

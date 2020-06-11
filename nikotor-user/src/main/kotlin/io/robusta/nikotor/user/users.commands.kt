@@ -4,7 +4,7 @@ import io.robusta.nikotor.*
 import io.robusta.nikotor.core.*
 import java.util.*
 
-
+val hasher = Hasher()
 data class RegisterUserCommand(override val payload: RegisterPayload) : RunnableCommand<RegisterPayload, Pair<HashedPassword, Token>>(payload) {
 
     override suspend fun run(): Pair<HashedPassword, Token> {
@@ -12,7 +12,8 @@ data class RegisterUserCommand(override val payload: RegisterPayload) : Runnable
         if (queryUserByEmail(email) != null) {
             throw IllegalStateException("email $email is already used")
         }
-        return Pair(Hasher.hashPassword(payload.password), createRandomToken())
+
+        return Pair(hasher.hashPassword(payload.password), createRandomToken())
     }
 
 
@@ -102,7 +103,7 @@ class ChangePasswordCommand(override val payload: EmailPasswordPayload) : Runnab
     }
 
     override suspend fun run(): HashedPassword {
-        return Hasher.hashPassword(payload.password)
+        return hasher.hashPassword(payload.password)
     }
 
     override fun generateEvent(result: HashedPassword): PasswordUpdatedEvent {

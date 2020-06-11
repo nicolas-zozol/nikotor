@@ -72,8 +72,6 @@ class UsersFeatureTest {
             val result = engine.process(loginCommand)
             assertTrue(result.sequenceId > 1)
             assertTrue(privateQueryCheckPassword(janeDoeEmail, "ABCD"))
-
-
         }
 
     }

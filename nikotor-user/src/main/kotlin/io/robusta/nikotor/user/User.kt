@@ -15,7 +15,7 @@ abstract class AbstractAuditingEntity {
 /**
  * User email is both database key and login
  */
-class User(val email: String) : AbstractAuditingEntity() {
+public class User(val email: String) : AbstractAuditingEntity() {
 
 
     var password: String? = null

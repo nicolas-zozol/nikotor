@@ -24,6 +24,10 @@ interface HasUser {
     val user: User
 }
 
+interface ModifiedBy {
+    val user: User
+}
+
 // Don't use this. Use concept of Decorator, ie Modification
 interface Auditable {
 

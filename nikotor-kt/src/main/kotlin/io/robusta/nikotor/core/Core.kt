@@ -29,6 +29,13 @@ class ValidationResult(var result: Boolean = true) {
     }
 }
 
+interface ICommandResult{
+    val result: Boolean;
+}
+
+class OkResult:ICommandResult{
+    override val result=true;
+}
 
 /**
  * Commands are NOT responsible for authorization of its execution. Processing a
@@ -42,7 +49,7 @@ class ValidationResult(var result: Boolean = true) {
  *
  * Some Command (#SimpleCommand, #ThrowableCommand) return a kotlin Unit result
  */
-interface Command<out Payload, CommandResult> {
+interface Command<out Payload, RunResult:ICommandResult>{
 
     val payload: Payload
     /**
@@ -61,77 +68,80 @@ interface Command<out Payload, CommandResult> {
      * Side effects are http request to external system, write in files....
      * It can also decide if projection state is suitable for executing command in nominal case.
      * For example the result of `run()` can be `true` or false, or throw a
-     * `InsufficientStockException` that will be catch by the engine.
+     * `InsufficientStockException`, `EmailAlreadyRegisteredException` that will be catch by the engine.
+     *
+     * It's up to you to design if the fact that the email is registered is a
+     * CommandResult or a thrown exception, thought I would typically design it as a CommandResult
      *
      * If `run()` does nothing, you probably want a #SimpleCommand
      * If `run()` throws exception without returning a result, you probably want a #ThrowableCommand
      *
      */
-    suspend fun run(): CommandResult
+    suspend fun run(): RunResult
 
-    // TODO: Not happy at all with this * invariance
-    fun generateEvents(result: CommandResult): Events
-    //fun generateEvent(result: CommandResult): Event<*>
 
-    // TODO: Command should return many events ?
+    fun generateEvents(result: RunResult): Events
+
+
 }
 
 /**
  * Command that create an event that depends on the run() result
  */
-abstract class RunnableCommand<out Payload, Result>(override val payload: Payload) :
-        Command<Payload, Result> {
+abstract class RunnableCommand<out Payload, RunResult:ICommandResult>(override val payload: Payload) :
+        Command<Payload, RunResult> {
 
 
-    override fun generateEvents(result: Result): Events {
+    override fun generateEvents(result: RunResult): Events {
         return listOf(this.generateEvent(result))
     }
 
-    abstract fun generateEvent(result:Result): Event<*>
+    abstract fun generateEvent(result:RunResult): Event<*>
 
 
 }
 
 /**
- * Command that could fail before creating an event
+ * Command that could fail before creating an event.
+ * @deprecated: just use RunnableCommand
  */
 abstract class ThrowableCommand<out Payload>(override val payload: Payload) :
-        Command<Payload, Unit> {
+        Command<Payload, OkResult> {
 
-    override suspend fun run(): Unit {
-        runUnit()
+    override suspend fun run(): OkResult {
+        return OkResult()
     }
 
-    abstract fun runUnit()
-
-    override fun generateEvents(result: Unit): Events {
+    override fun generateEvents(result: OkResult): Events {
         return listOf(this.generateEvent())
     }
 
     abstract fun generateEvent(): Event<*>
-
-
 }
 
 /**
  * Command that does not run anything. Therefore the generated event is predictive if validation is
  */
-abstract class SimpleCommand<out Payload>(override val payload: Payload) :
-        Command<Payload, Unit> {
+abstract class SimpleCommand<Payload>(override val payload: Payload) :
+        Command<Payload, OkResult> {
 
-    override fun generateEvents(result: Unit): Events {
+    override fun generateEvents(result: OkResult): Events {
         return listOf(this.generateEvent())
     }
 
+    /**
+     * It's not the problem of the Command to decide what kind of Event
+     * will be produced by the later system
+     */
     abstract fun generateEvent(): Event<*>
 
-    override suspend fun run() {
-
+    override suspend fun run() :OkResult{
+        return OkResult();
     }
 }
 
 
-interface Event<EventPayload> {
+interface Event<out EventPayload> {
     val type: String
     val id: String
     /**
@@ -169,16 +179,20 @@ interface NikotorSubscriber {
     fun <EventPayload> reactTo(event: Event<EventPayload>): Void
 }
 
+// TODO: when calm, try to change <Payload, CommandResult:ICommandResult> by <*,*> to simplify stuff
 interface NikotorEngine {
 
-    suspend fun <Payload, CommandResult> process(
+    // TODO: there may be two process: one waiting for all the events,
+    // one for waiting with one Event,
+    // but more often waiting for the CommandResult
+    suspend fun <Payload, CommandResult:ICommandResult> process(
             command: Command<Payload, CommandResult>
     ): PersistedEvent<*, *>
 
     /**
      * Used for Java interaction
      */
-    fun <Payload, CommandResult>processAsync(command: Command<Payload, CommandResult>)
+    fun <Payload, CommandResult:ICommandResult>processAsync(command: Command<Payload, CommandResult>)
             : CompletableFuture<PersistedEvent<*, *>>{
         return     GlobalScope.future { process(command) }
 

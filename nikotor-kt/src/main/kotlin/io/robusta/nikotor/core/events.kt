@@ -6,7 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-interface PersistedEvent<E, P> where E : Event<P> {
+interface PersistedEvent<out E, P> where E : Event<P> {
     val event: E
     val sequenceId: Long
     val technicalDate: Long

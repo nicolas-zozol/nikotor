@@ -1,9 +1,39 @@
 package io.robusta.nikotor.user
 
+import io.robusta.nikotor.data.HasId
+import io.robusta.nikotor.data.SimpleEntity
 import java.time.Instant
 import java.util.*
+import org.mindrot.jbcrypt.BCrypt
+import java.security.MessageDigest
 
-abstract class AbstractAuditingEntity {
+
+interface HasEmail {
+    val email: String
+}
+
+interface HasPassword {
+    val password: String
+}
+
+interface HasToken {
+    val token: String
+}
+
+interface HasUser {
+    val user: User
+}
+
+interface ModifiedBy {
+    val user: User
+}
+
+// Don't use this. Use concept of Decorator, ie Modification
+interface Auditable {
+
+}
+
+abstract class AbstractAuditingEntity : SimpleEntity(), Auditable, HasId {
 
     var createdBy: String? = null
     var createdDate = Instant.now()
@@ -15,14 +45,16 @@ abstract class AbstractAuditingEntity {
 /**
  * User email is both database key and login
  */
-public class User(val email: String) : AbstractAuditingEntity() {
+open class User(override val email: String) : AbstractAuditingEntity(), HasEmail {
 
+    override val id: String
+        get() {
+            return this.email
+        }
 
-    var password: String? = null
     var firstName: String? = null
 
     var lastName: String? = null
-
 
     var activated = false
 
@@ -55,8 +87,23 @@ public class User(val email: String) : AbstractAuditingEntity() {
         return email
     }
 
+}
+
+class ActivationTokenRecord(override val user: User) : HasId, HasUser {
+    override val id: String
+        get() = user.email
+    val token: String = UUID.randomUUID().toString()
 
 }
 
+class Account(override val user: User, val hashedPassword: HashedPassword) : HasUser, HasId {
+    override val id: String
+        get() = user.email
+}
+
+class Visit(override val user: User, val date: Date) : HasUser, HasId {
+    override val id = createRandomId()
+}
 
 data class Authority(val name: String)
+

@@ -1,4 +1,6 @@
 # Created by Nicolas Zozol on top of nikotor project
 
 
-
+*.class
+target/
+doing-and-todos.md

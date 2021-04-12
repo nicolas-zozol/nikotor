@@ -3,6 +3,7 @@ package main.kotlin.nikotor.io.robusta.nikotor
 import io.robusta.nikotor.InMemoryEventStore
 import io.robusta.nikotor.fixture.potaufeu.potAuFeuEnded
 import io.robusta.nikotor.fixture.potaufeu.potAuFeuStarted
+import kotlinx.coroutines.runBlocking
 
 import org.junit.Before
 import org.junit.Test
@@ -12,7 +13,7 @@ import kotlin.test.assertSame
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InMemoryEventStoreTest {
 
-    lateinit var store: InMemoryEventStore
+    private lateinit var store: InMemoryEventStore
 
     @Before
     fun init() {
@@ -26,32 +27,35 @@ class InMemoryEventStoreTest {
 
     @Test
     fun add() {
-        val future = store
-                .persist(potAuFeuStarted)
-                .thenAccept { store.persist(potAuFeuEnded) }
-                .thenAccept { assert(store.events.size == 2) }
-        future.get()
+        runBlocking {
+            store.persist(potAuFeuStarted)
+            store.persist(potAuFeuEnded)
+            assert(store.events.size == 2)
+        }
     }
 
     @Test
     fun resetWith() {
-        val future = store
-            .persist(potAuFeuStarted)
-            .thenAccept { store.persist(potAuFeuEnded) }
-            .thenAccept { store.resetWith(listOf(potAuFeuEnded)) }
-            .thenAccept { assert(store.events.size == 1) }
-        future.get()
+
+        runBlocking {
+            store.persist(potAuFeuStarted)
+            store.persist(potAuFeuEnded)
+            store.resetWith(listOf(potAuFeuEnded))
+            assert(store.events.size == 1)
+
+        }
     }
 
     @Test
-    fun fromIndex(){
-        val future = store
-            .persist(potAuFeuStarted)
-            .thenApply { store.persist(potAuFeuEnded) }
-            .thenCompose { store.getAllEventsStartingFromIndex(1) }
-        val value = future.get()[0]
-        assertSame(value.type, potAuFeuEnded.type)
+    fun fromIndex() {
 
+        runBlocking {
+            store.persist(potAuFeuStarted)
+            store.persist(potAuFeuEnded)
+            val events = store.getAllEventsStartingFromIndex(1)
+            val value = events[0]
+            assertSame(value.event.type, potAuFeuEnded.type)
+        }
 
     }
 

@@ -1,29 +1,34 @@
 package io.robusta.nikotor
 
+import io.robusta.nikotor.core.*
 import java.lang.Exception
+import java.lang.IllegalStateException
 import java.util.concurrent.CompletableFuture
 
 /**
  * Very simple engine with InMemoryEventStore and no subscription
  */
 class SimpleNikotorEngine(
-        override val eventStore: EventStore = InMemoryEventStore(),
-        private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
+    override val eventStore: EventStore = InMemoryEventStore(),
+    private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
-    override fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): CompletableFuture<PersistedEvent<*>> {
+    override suspend fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
 
-        val validation = command.validate()
-        if (!validation.result) {
-            throw NikotorValidationException(validation.reasons.toString(), validation.reasons)
-        }
+        command.validate().throwIfInvalid()
+
         val result: CommandResult?
         try {
-            result = command.run().get()
-            val event = command.generateEvent(result)
-            val future = eventStore.persist(event)
-            future.thenAccept { update(it) }
-            return future
+            result = command.run()
+            val events = command.generateEvents(result)
+            if(events.size>1){
+                throw IllegalStateException("Multiple events not yet implemented in SimpleEngine")
+            }
+            val event = events[0]
+            // todo: problem with a catch: check if ok with coroutines now
+            val persistedEvent = eventStore.persist(event)
+            updateProjections(persistedEvent)
+            return persistedEvent
         } catch (nikException: NikotorException) {
             // detected error, just rethrow
             throw nikException
@@ -32,8 +37,8 @@ class SimpleNikotorEngine(
         }
     }
 
-    private fun update(persistedEvent: PersistedEvent<*>){
-        projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent) }
+    private suspend fun updateProjections(persistedEvent: PersistedEvent<*, *>){
+        projectionsUpdaters.forEach { it.updateWithEvent(persistedEvent.event) }
     }
 
 

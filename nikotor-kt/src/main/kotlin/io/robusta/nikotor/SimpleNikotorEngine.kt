@@ -13,7 +13,7 @@ class SimpleNikotorEngine(
     private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
-    override suspend fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
+    override suspend fun <Payload, CommandResult:ICommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
 
         command.validate().throwIfInvalid()
 
@@ -44,11 +44,11 @@ class SimpleNikotorEngine(
 
     override fun subscribe(newSubscriber: NikotorSubscriber): Void {
 
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented")
     }
 
     override fun unsubscribe(oldSubscriber: NikotorSubscriber): Void {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented")
     }
 
 }

@@ -77,7 +77,7 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
         return ValidationResult().check(payload.email.isNotEmpty(), "Email is empty")
     }
 
-    override fun runUnit() {
+    override suspend fun run() :OkResult{
         val email = payload.email
         val user = queryUserByEmail(email) ?: throw NikotorValidationException("email $email does not exist")
 
@@ -86,6 +86,7 @@ class ActivateUserCommand(override val payload: TokenPayload) : ThrowableCommand
                 .check(!user.activated, "User $email is already activated")
                 .check(activationToken == payload.token, "Activation key ${payload.token} is wrong for user $email")
                 .throwIfInvalid()
+        return OkResult()
 
     }
 
@@ -154,9 +155,10 @@ class UpdateUserCommand(override val payload: User) : Command<User, User> {
 
 
 class RemoveUserCommand(override val payload: HasEmailPayload) : ThrowableCommand<HasEmailPayload>(payload) {
-    override fun runUnit() {
+    override suspend fun run(): OkResult {
         val email = payload.email
         queryUserByEmail(email) ?: throw NikotorValidationException("email $email does not exist")
+        return OkResult()
     }
 
     override fun validate(): ValidationResult {

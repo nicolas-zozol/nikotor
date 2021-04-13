@@ -49,7 +49,7 @@ class OkResult:ICommandResult{
  *
  * Some Command (#SimpleCommand, #ThrowableCommand) return a kotlin Unit result
  */
-interface Command<out Payload, RunResult:ICommandResult>{
+interface Command<out Payload, RunResult>{
 
     val payload: Payload
     /**
@@ -88,7 +88,7 @@ interface Command<out Payload, RunResult:ICommandResult>{
 /**
  * Command that create an event that depends on the run() result
  */
-abstract class RunnableCommand<out Payload, RunResult:ICommandResult>(override val payload: Payload) :
+abstract class RunnableCommand<out Payload, RunResult>(override val payload: Payload) :
         Command<Payload, RunResult> {
 
 
@@ -185,14 +185,14 @@ interface NikotorEngine {
     // TODO: there may be two process: one waiting for all the events,
     // one for waiting with one Event,
     // but more often waiting for the CommandResult
-    suspend fun <Payload, CommandResult:ICommandResult> process(
+    suspend fun <Payload, CommandResult> process(
             command: Command<Payload, CommandResult>
     ): PersistedEvent<*, *>
 
     /**
      * Used for Java interaction
      */
-    fun <Payload, CommandResult:ICommandResult>processAsync(command: Command<Payload, CommandResult>)
+    fun <Payload, CommandResult>processAsync(command: Command<Payload, CommandResult>)
             : CompletableFuture<PersistedEvent<*, *>>{
         return     GlobalScope.future { process(command) }
 

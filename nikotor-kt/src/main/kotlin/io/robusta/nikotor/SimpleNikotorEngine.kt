@@ -13,7 +13,7 @@ class SimpleNikotorEngine(
     private val projectionsUpdaters: List<ProjectionUpdater> = emptyList()
 ) : NikotorEngine {
 
-    override suspend fun <Payload, CommandResult:ICommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
+    override suspend fun <Payload, CommandResult> process(command: Command<Payload, CommandResult>): PersistedEvent<*, *> {
 
         command.validate().throwIfInvalid()
 

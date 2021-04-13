@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+
+</head>
+
+<body>
+
+<a>Login with google</a>
+
+</body>
+<script>
+
+    fetch("/create-authorization-url")
+        .then(resp=>resp.json())
+        .then(data => {
+            console.log({data})
+            const a = document
+                .querySelector("a")
+            a.setAttribute("href", data.url)
+
+        })
+
+</script>
+
+
+</html>

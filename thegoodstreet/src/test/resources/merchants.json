@@ -1,0 +1,10 @@
+[
+  {
+    "uuid": "xq78",
+    "realm": "merchant",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@doe.com",
+    "company": "acme"
+  }
+]
